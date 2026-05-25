@@ -74,5 +74,9 @@ app-example
 /ios
 /android
 
+# Firebase native config files (added when using Firebase Auth / native SDKs)
+google-services.json
+GoogleService-Info.plist
+
 .vscode/
 .idea/

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ScrollView, View, TouchableOpacity, FlatList } from 'react-native';
+import { ScrollView, View, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -7,13 +7,7 @@ import { ThemedText, ThemedView } from '@/src/components/theme/themed-view';
 import { ThemedButton } from '@/src/components/theme/themed-button';
 import { VendorCard } from '@/src/components/molecules/VendorCard';
 import { useTheme } from '@/src/components/theme/theme-provider';
-import {
-  mockRecentlyLikedVendors,
-  mockVendorInquiries,
-  mockVendorLikes,
-  mockVendorShortlist,
-  mockWedding,
-} from '@/src/mocks/profile';
+import { useWedding } from '@/src/hooks/useWedding';
 
 const formatWeddingDate = (date?: string) => {
   if (!date) return null;
@@ -77,16 +71,18 @@ export function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const tabBarOffset = 54;
 
-  const weddingDateLabel = useMemo(() => formatWeddingDate(mockWedding.weddingDate), []);
-  const daysUntilWedding = useMemo(() => getDaysUntil(mockWedding.weddingDate), []);
+  const { loading, wedding, favorites, recentVendors } = useWedding(5);
+
+  const weddingDateLabel = useMemo(() => formatWeddingDate(wedding?.weddingDate), [wedding]);
+  const daysUntilWedding = useMemo(() => getDaysUntil(wedding?.weddingDate), [wedding]);
 
   const stats = useMemo(
     () => [
-      { label: 'Liked', value: mockVendorLikes.length, icon: 'heart', accentColor: colors.accent.pink },
-      { label: 'Contacted', value: mockVendorInquiries.length, icon: 'chatbubble-ellipses', accentColor: colors.accent.blue },
-      { label: 'Shortlisted', value: mockVendorShortlist.length, icon: 'bookmark', accentColor: colors.accent.green },
+      { label: 'Liked', value: favorites.length, icon: 'heart' as const, accentColor: colors.accent.pink },
+      { label: 'Contacted', value: 0, icon: 'chatbubble-ellipses' as const, accentColor: colors.accent.blue },
+      { label: 'Shortlisted', value: 0, icon: 'bookmark' as const, accentColor: colors.accent.green },
     ],
-    [colors.accent.blue, colors.accent.green, colors.accent.pink]
+    [favorites.length, colors.accent.blue, colors.accent.green, colors.accent.pink]
   );
 
   const handleVendorPress = (vendorId: string) => {
@@ -99,7 +95,7 @@ export function ProfileScreen() {
         {/* Wedding Header */}
         <ThemedView variant="background" className="px-6 pt-6 pb-4 items-center">
           <ThemedText className="text-3xl font-semibold text-center">
-            {mockWedding.coupleName}
+            {loading ? '...' : (wedding?.coupleName ?? 'My Wedding')}
           </ThemedText>
           <ThemedText variant="secondary" className="mt-2 text-center">
             {weddingDateLabel || 'Wedding date not set'}
@@ -137,7 +133,7 @@ export function ProfileScreen() {
               <ThemedText variant="accentPink">View all</ThemedText>
             </TouchableOpacity>
           </View>
-          {mockRecentlyLikedVendors.length === 0 ? (
+          {recentVendors.length === 0 ? (
             <ThemedView
               variant="card"
               className="rounded-xl px-4 py-6 items-center"
@@ -150,7 +146,7 @@ export function ProfileScreen() {
             </ThemedView>
           ) : (
             <FlatList
-              data={mockRecentlyLikedVendors}
+              data={recentVendors}
               keyExtractor={(item) => item.id}
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -180,14 +176,14 @@ export function ProfileScreen() {
             <View className="flex-row items-center justify-between">
               <ThemedText variant="secondary">Style</ThemedText>
               <ThemedText className="font-semibold">
-                {formatWeddingStyle(mockWedding.style)}
+                {formatWeddingStyle(wedding?.style)}
               </ThemedText>
             </View>
             <View className="flex-row items-center justify-between mt-3">
               <ThemedText variant="secondary">Guest count</ThemedText>
               <ThemedText className="font-semibold">
-                {mockWedding.guestCountRange
-                  ? `${mockWedding.guestCountRange.min}-${mockWedding.guestCountRange.max}`
+                {wedding?.guestCountRange
+                  ? `${wedding.guestCountRange.min}-${wedding.guestCountRange.max}`
                   : 'Not set'}
               </ThemedText>
             </View>
