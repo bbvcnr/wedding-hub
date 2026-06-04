@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useTheme } from '@/src/components/theme/theme-provider';
 import { ThemedText, ThemedView } from '@/src/components/theme/themed-view';
 import { VendorCard } from '@/src/components/molecules/VendorCard';
+import { ContactModal } from '@/src/components/molecules/ContactModal';
 import { useAuth } from '@/src/context/AuthContext';
 import { getFavorites, removeFavorite } from '@/src/services/weddingService';
 import { getVendorDetails } from '@/src/services/vendorService';
@@ -22,8 +23,10 @@ export default function Saved() {
   const { weddingId } = useAuth();
   const [entries, setEntries] = useState<SavedEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [contactVendor, setContactVendor] = useState<{ id: string; name: string } | null>(null);
 
   const load = useCallback(async () => {
+    if (!weddingId) return;
     setLoading(true);
     try {
       const likes = await getFavorites(weddingId);
@@ -42,6 +45,7 @@ export default function Saved() {
   useEffect(() => { load(); }, [load]);
 
   const handleRemove = async (entry: SavedEntry) => {
+    if (!weddingId) return;
     await removeFavorite(weddingId, entry.like.id);
     setEntries((prev) => prev.filter((e) => e.like.id !== entry.like.id));
   };
@@ -79,13 +83,20 @@ export default function Saved() {
           renderItem={({ item }) => (
             <VendorCard
               vendor={item.vendor}
+              isFavorite={true}
               onDetailsPress={(id) => router.push(`/vendor/${id}`)}
               onFavoritePress={() => handleRemove(item)}
-              onContactPress={() => undefined}
+              onContactPress={(id, name) => setContactVendor({ id, name })}
             />
           )}
         />
       )}
+      <ContactModal
+        visible={!!contactVendor}
+        vendorId={contactVendor?.id ?? ''}
+        vendorName={contactVendor?.name ?? ''}
+        onClose={() => setContactVendor(null)}
+      />
     </SafeAreaView>
   );
 }

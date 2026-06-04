@@ -68,6 +68,38 @@ export const mockHomeContent: HomeContent = {
       tags: ['Garden', 'WiFi', 'Parking'],
     },
   ],
+  featuredPhotographers: [
+    {
+      id: 'ph-1',
+      name: 'Lumière Studio',
+      category: 'photography',
+      city: 'Sarajevo',
+      shortDescription: 'Cinematic wedding photography with a timeless, editorial style.',
+      imageUrl: 'https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=800',
+      rating: 4.9,
+      tags: ['Drone', 'Film'],
+    },
+    {
+      id: 'ph-2',
+      name: 'Golden Hour Photography',
+      category: 'photography',
+      city: 'Mostar',
+      shortDescription: 'Natural light photography capturing every candid moment.',
+      imageUrl: 'https://images.unsplash.com/photo-1606800052052-a08af7148866?w=800',
+      rating: 4.8,
+      tags: ['Video', 'Album'],
+    },
+    {
+      id: 'ph-3',
+      name: 'Eternal Moments',
+      category: 'photography',
+      city: 'Banja Luka',
+      shortDescription: 'Award-winning duo capturing love stories across the Balkans.',
+      imageUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800',
+      rating: 4.7,
+      tags: ['Drone', 'Video', 'Album'],
+    },
+  ],
   recentlyLikedVendors: [
     {
       id: '3',

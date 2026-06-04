@@ -8,18 +8,35 @@ import { ApiService } from '@/src/services/api';
 import { SearchVendorRequest } from '@/src/types/vendor';
 import { useTheme } from '@/src/components/theme/theme-provider';
 
+export type SortBy = 'rating_desc' | 'rating_asc' | 'name_asc' | 'name_desc';
+
 interface VendorListProps {
   searchParams: Omit<SearchVendorRequest, 'pageRequest'>;
+  sortBy?: SortBy;
   onVendorPress?: (vendorId: string) => void;
   onFavoritePress?: (vendorId: string) => void;
-  onContactPress?: (vendorId: string) => void;
+  onContactPress?: (vendorId: string, vendorName: string) => void;
+  getFavoriteState?: (vendorId: string) => boolean;
+}
+
+function sortVendors(vendors: VendorItem[], sortBy: SortBy): VendorItem[] {
+  return [...vendors].sort((a, b) => {
+    switch (sortBy) {
+      case 'rating_desc': return (b.rating ?? 0) - (a.rating ?? 0);
+      case 'rating_asc':  return (a.rating ?? 0) - (b.rating ?? 0);
+      case 'name_asc':    return a.name.localeCompare(b.name);
+      case 'name_desc':   return b.name.localeCompare(a.name);
+    }
+  });
 }
 
 export function VendorList({
   searchParams,
+  sortBy = 'rating_desc',
   onVendorPress,
   onFavoritePress,
   onContactPress,
+  getFavoriteState,
 }: VendorListProps) {
   const { isDark } = useTheme();
   const insets = useSafeAreaInsets();
@@ -90,9 +107,12 @@ export function VendorList({
     loadVendors(0, true);
   };
 
+  const sortedVendors = sortVendors(vendors, sortBy);
+
   const renderItem = ({ item }: { item: VendorItem }) => (
     <VendorCard
       vendor={item}
+      isFavorite={getFavoriteState?.(item.id) ?? false}
       onFavoritePress={onFavoritePress}
       onDetailsPress={onVendorPress}
       onContactPress={onContactPress}
@@ -150,7 +170,7 @@ export function VendorList({
 
   return (
     <FlatList
-      data={vendors}
+      data={sortedVendors}
       renderItem={renderItem}
       keyExtractor={(item) => item.id}
       contentContainerStyle={{

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedView, ThemedText } from '@/src/components/theme/themed-view';
@@ -8,22 +8,22 @@ import { useTheme } from '@/src/components/theme/theme-provider';
 
 interface VendorCardProps {
   vendor: VendorItem;
+  isFavorite?: boolean;
   onFavoritePress?: (vendorId: string) => void;
   onDetailsPress?: (vendorId: string) => void;
-  onContactPress?: (vendorId: string) => void;
+  onContactPress?: (vendorId: string, vendorName: string) => void;
 }
 
 export function VendorCard({
   vendor,
+  isFavorite = false,
   onFavoritePress,
   onDetailsPress,
   onContactPress,
 }: VendorCardProps) {
   const { isDark, colors } = useTheme();
-  const [isFavorite, setIsFavorite] = useState(false);
 
   const handleFavoritePress = () => {
-    setIsFavorite(!isFavorite);
     onFavoritePress?.(vendor.id);
   };
 
@@ -125,7 +125,7 @@ export function VendorCard({
                 style={{ marginRight: 4 }}
               />
               <ThemedText variant="secondary" className="text-sm">
-                Do {vendor.capacity} Gostiju
+                Up to {vendor.capacity} guests
               </ThemedText>
             </ThemedView>
           )}
@@ -157,7 +157,7 @@ export function VendorCard({
         <ThemedView variant="card" style={styles.buttonsContainer}>
           <ThemedView variant="card" style={styles.buttonWrapper}>
             <ThemedButton
-              title="Više Detalja"
+              title="View Details"
               variant="outline"
               size="sm"
               onPress={() => onDetailsPress?.(vendor.id)}
@@ -165,10 +165,10 @@ export function VendorCard({
           </ThemedView>
           <ThemedView variant="card" style={styles.buttonWrapper}>
             <ThemedButton
-              title="Kontaktiraj"
+              title="Contact"
               variant="primary"
               size="sm"
-              onPress={() => onContactPress?.(vendor.id)}
+              onPress={() => onContactPress?.(vendor.id, vendor.name)}
             />
           </ThemedView>
         </ThemedView>

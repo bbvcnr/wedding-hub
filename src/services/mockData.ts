@@ -223,6 +223,10 @@ function filterVendors(
 /**
  * Get mock vendor search results with pagination
  */
+export function getMockFeaturedByCategory(category: string, count: number): VendorItem[] {
+  return MOCK_VENDORS.filter((v) => v.category === category).slice(0, count);
+}
+
 export function getMockVendorSearch(
   request: SearchVendorRequest
 ): SearchVendorResponse {

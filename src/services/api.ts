@@ -1,6 +1,6 @@
-import { SearchVendorRequest, SearchVendorResponse, VendorDetails } from '@/src/types/vendor';
-import { getMockVendorSearch, getMockVendorDetails } from './mockData';
-import { searchVendors, getVendorDetails } from './vendorService';
+import { SearchVendorRequest, SearchVendorResponse, VendorDetails, VendorItem } from '@/src/types/vendor';
+import { getMockVendorSearch, getMockVendorDetails, getMockFeaturedByCategory } from './mockData';
+import { searchVendors, getVendorDetails, getFeaturedVendorsByCategory } from './vendorService';
 
 // Set EXPO_PUBLIC_USE_MOCK=true in .env to force mock data during development
 const USE_MOCK = process.env.EXPO_PUBLIC_USE_MOCK === 'true';
@@ -20,5 +20,13 @@ export class ApiService {
       return getMockVendorDetails(vendorId);
     }
     return getVendorDetails(vendorId);
+  }
+
+  static async getFeaturedVendorsByCategory(category: string, count = 5): Promise<VendorItem[]> {
+    if (USE_MOCK) {
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      return getMockFeaturedByCategory(category, count);
+    }
+    return getFeaturedVendorsByCategory(category, count);
   }
 }

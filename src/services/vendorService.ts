@@ -188,6 +188,29 @@ export async function searchVendors(
   };
 }
 
+export async function getFeaturedVendorsByCategory(
+  category: string,
+  count: number = 5
+): Promise<VendorItem[]> {
+  const typeKeys = Object.entries(TYPE_TO_CATEGORY)
+    .filter(([, cat]) => cat === category)
+    .map(([type]) => type);
+
+  if (typeKeys.length === 0) return [];
+
+  const q = query(
+    collection(db, VENDORS),
+    where('enabled', '==', true),
+    where('status', '==', 'APPROVED'),
+    where('type', 'in', typeKeys.slice(0, 10)),
+    orderBy('rating', 'desc'),
+    limit(count)
+  );
+
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((d) => docToVendorItem(d.id, d.data()));
+}
+
 export async function getVendorDetails(vendorId: string): Promise<VendorDetails> {
   const ref = doc(db, VENDORS, vendorId);
   const snap = await getDoc(ref);
