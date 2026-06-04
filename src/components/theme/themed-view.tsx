@@ -47,13 +47,14 @@ interface ThemedTextProps extends TextProps {
   className?: string;
 }
 
-export function ThemedText({ 
-  variant = 'primary', 
-  className = '', 
-  ...props 
+export function ThemedText({
+  variant = 'primary',
+  className = '',
+  style: styleProp,
+  ...props
 }: ThemedTextProps) {
   const { colors } = useTheme();
-  
+
   const getTextStyle = () => {
     const variantMap = {
       primary: colors.text.primary,
@@ -68,10 +69,10 @@ export function ThemedText({
   };
 
   return (
-    <Text 
+    <Text
       className={className}
-      style={[getTextStyle(), props.style]}
-      {...props} 
+      style={[getTextStyle(), styleProp]}
+      {...props}
     />
   );
 }

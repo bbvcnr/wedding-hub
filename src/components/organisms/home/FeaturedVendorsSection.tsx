@@ -8,9 +8,19 @@ interface FeaturedVendorsSectionProps {
   title: string;
   vendors: VendorItem[];
   onPressVendor?: (vendorId: string) => void;
+  onFavoritePress?: (vendorId: string) => void;
+  onContactPress?: (vendorId: string, vendorName: string) => void;
+  favoritesSet?: Set<string>;
 }
 
-export function FeaturedVendorsSection({ title, vendors, onPressVendor }: FeaturedVendorsSectionProps) {
+export function FeaturedVendorsSection({
+  title,
+  vendors,
+  onPressVendor,
+  onFavoritePress,
+  onContactPress,
+  favoritesSet,
+}: FeaturedVendorsSectionProps) {
   if (vendors.length === 0) {
     return (
       <ThemedView variant="card" className="rounded-2xl px-4 py-5 items-center">
@@ -35,9 +45,10 @@ export function FeaturedVendorsSection({ title, vendors, onPressVendor }: Featur
           <View className="mr-4" style={{ width: 280 }}>
             <VendorCard
               vendor={item}
+              isFavorite={favoritesSet?.has(item.id) ?? false}
               onDetailsPress={onPressVendor}
-              onFavoritePress={() => undefined}
-              onContactPress={() => undefined}
+              onFavoritePress={onFavoritePress}
+              onContactPress={onContactPress}
             />
           </View>
         )}

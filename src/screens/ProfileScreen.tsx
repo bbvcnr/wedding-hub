@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ScrollView, View, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,8 +6,13 @@ import { useRouter } from 'expo-router';
 import { ThemedText, ThemedView } from '@/src/components/theme/themed-view';
 import { ThemedButton } from '@/src/components/theme/themed-button';
 import { VendorCard } from '@/src/components/molecules/VendorCard';
+import { GuestsModal } from '@/src/components/molecules/GuestsModal';
+import { BudgetModal } from '@/src/components/molecules/BudgetModal';
+import { ContactModal } from '@/src/components/molecules/ContactModal';
 import { useTheme } from '@/src/components/theme/theme-provider';
 import { useWedding } from '@/src/hooks/useWedding';
+import { useAuth } from '@/src/context/AuthContext';
+import { Wedding } from '@/src/types/profile';
 
 const formatWeddingDate = (date?: string) => {
   if (!date) return null;
@@ -36,12 +41,14 @@ interface StatCardProps {
   value: number;
   icon: keyof typeof Ionicons.glyphMap;
   accentColor: string;
+  onPress?: () => void;
 }
 
-function StatCard({ label, value, icon, accentColor }: StatCardProps) {
+function StatCard({ label, value, icon, accentColor, onPress }: StatCardProps) {
   const { colors } = useTheme();
 
   return (
+    <TouchableOpacity onPress={onPress} activeOpacity={onPress ? 0.7 : 1}>
     <ThemedView
       variant="card"
       className="flex-1 rounded-2xl px-4 py-5"
@@ -62,6 +69,17 @@ function StatCard({ label, value, icon, accentColor }: StatCardProps) {
         {label}
       </ThemedText>
     </ThemedView>
+    </TouchableOpacity>
+  );
+}
+
+function InfoCell({ label, value, highlight = false, negative = false }: { label: string; value: string; highlight?: boolean; negative?: boolean }) {
+  const { colors } = useTheme();
+  return (
+    <View className="items-center">
+      <ThemedText variant="secondary" className="text-xs mb-1">{label}</ThemedText>
+      <ThemedText className="font-bold text-base" style={highlight ? { color: negative ? '#EF4444' : '#10B981' } : undefined}>{value}</ThemedText>
+    </View>
   );
 }
 
@@ -70,17 +88,39 @@ export function ProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const tabBarOffset = 54;
+  const { logout } = useAuth();
 
   const { loading, wedding, favorites, recentVendors } = useWedding(5);
+  const [weddingData, setWeddingData] = useState<Partial<Wedding>>({});
+  const [showGuests, setShowGuests] = useState(false);
+  const [showBudget, setShowBudget] = useState(false);
+  const [contactVendor, setContactVendor] = useState<{ id: string; name: string } | null>(null);
+
+  const mergedWedding = wedding ? { ...wedding, ...weddingData } : null;
+
+  const guestsPerTable = mergedWedding?.totalGuests && mergedWedding?.numberOfTables && mergedWedding.numberOfTables > 0
+    ? Math.round(mergedWedding.totalGuests / mergedWedding.numberOfTables)
+    : null;
+
+  const remainingBudget = mergedWedding?.totalBudget != null && mergedWedding?.spentBudget != null
+    ? mergedWedding.totalBudget - mergedWedding.spentBudget
+    : null;
+
+  const handleLogout = () => {
+    Alert.alert('Logout', 'Are you sure you want to log out?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Logout', style: 'destructive', onPress: () => logout() },
+    ]);
+  };
 
   const weddingDateLabel = useMemo(() => formatWeddingDate(wedding?.weddingDate), [wedding]);
   const daysUntilWedding = useMemo(() => getDaysUntil(wedding?.weddingDate), [wedding]);
 
   const stats = useMemo(
     () => [
-      { label: 'Liked', value: favorites.length, icon: 'heart' as const, accentColor: colors.accent.pink },
-      { label: 'Contacted', value: 0, icon: 'chatbubble-ellipses' as const, accentColor: colors.accent.blue },
-      { label: 'Shortlisted', value: 0, icon: 'bookmark' as const, accentColor: colors.accent.green },
+      { label: 'Liked', value: favorites.length, icon: 'heart' as const, accentColor: colors.accent.pink, onPress: () => router.push('/(tabs)/saved') },
+      { label: 'Contacted', value: 0, icon: 'chatbubble-ellipses' as const, accentColor: colors.accent.blue, onPress: undefined },
+      { label: 'Shortlisted', value: 0, icon: 'bookmark' as const, accentColor: colors.accent.green, onPress: () => router.push('/shortlist') },
     ],
     [favorites.length, colors.accent.blue, colors.accent.green, colors.accent.pink]
   );
@@ -120,9 +160,79 @@ export function ProfileScreen() {
           <ThemedText className="text-lg font-semibold mb-3">Your Progress</ThemedText>
           <View className="flex-row gap-3">
             {stats.map((stat) => (
-              <StatCard key={stat.label} {...stat} />
+              <StatCard key={stat.label} {...stat} onPress={stat.onPress} />
             ))}
           </View>
+        </ThemedView>
+
+        {/* Guests & Seating */}
+        <ThemedView variant="background" className="px-6 pt-6">
+          <View className="flex-row items-center justify-between mb-3">
+            <ThemedText className="text-lg font-semibold">Guests & Seating</ThemedText>
+            <TouchableOpacity onPress={() => setShowGuests(true)}>
+              <Ionicons name="create-outline" size={20} color={colors.accent.pink} />
+            </TouchableOpacity>
+          </View>
+          <ThemedView variant="card" className="rounded-xl px-4 py-4" style={{ borderColor: colors.border, borderWidth: 1 }}>
+            <View className="flex-row justify-between mb-3">
+              <InfoCell label="Total Guests" value={mergedWedding?.totalGuests?.toString() ?? '—'} />
+              <InfoCell label="Tables" value={mergedWedding?.numberOfTables?.toString() ?? '—'} />
+              <InfoCell label="VIP Tables" value={mergedWedding?.vipTables?.toString() ?? '—'} />
+              <InfoCell label="Per Table" value={guestsPerTable?.toString() ?? '—'} highlight />
+            </View>
+          </ThemedView>
+        </ThemedView>
+
+        {/* Budget */}
+        <ThemedView variant="background" className="px-6 pt-6">
+          <View className="flex-row items-center justify-between mb-3">
+            <ThemedText className="text-lg font-semibold">Budget</ThemedText>
+            <TouchableOpacity onPress={() => setShowBudget(true)}>
+              <Ionicons name="create-outline" size={20} color={colors.accent.pink} />
+            </TouchableOpacity>
+          </View>
+          <ThemedView variant="card" className="rounded-xl px-4 py-4" style={{ borderColor: colors.border, borderWidth: 1 }}>
+            <View className="flex-row justify-between">
+              <InfoCell label="Total" value={mergedWedding?.totalBudget ? `${mergedWedding.budgetCurrency ?? 'EUR'} ${mergedWedding.totalBudget.toLocaleString()}` : '—'} />
+              <InfoCell label="Spent" value={mergedWedding?.spentBudget ? `${mergedWedding.budgetCurrency ?? 'EUR'} ${mergedWedding.spentBudget.toLocaleString()}` : '—'} />
+              <InfoCell
+                label="Remaining"
+                value={remainingBudget != null ? `${mergedWedding?.budgetCurrency ?? 'EUR'} ${Math.abs(remainingBudget).toLocaleString()}` : '—'}
+                highlight
+                negative={remainingBudget !== null && remainingBudget < 0}
+              />
+            </View>
+          </ThemedView>
+        </ThemedView>
+
+        {/* Booked Venue */}
+        {mergedWedding?.bookedVenueName && (
+          <ThemedView variant="background" className="px-6 pt-6">
+            <ThemedText className="text-lg font-semibold mb-3">Booked Venue</ThemedText>
+            <ThemedView variant="card" className="rounded-xl px-4 py-4 flex-row items-center" style={{ borderColor: '#10B981', borderWidth: 1 }}>
+              <Ionicons name="checkmark-circle" size={24} color="#10B981" />
+              <ThemedText className="ml-3 font-semibold">{mergedWedding.bookedVenueName}</ThemedText>
+            </ThemedView>
+          </ThemedView>
+        )}
+
+        {/* Checklist */}
+        <ThemedView variant="background" className="px-6 pt-6">
+          <TouchableOpacity
+            onPress={() => router.push('/checklist')}
+            activeOpacity={0.8}
+          >
+            <ThemedView variant="card" className="rounded-xl px-4 py-4 flex-row items-center justify-between" style={{ borderColor: colors.border, borderWidth: 1 }}>
+              <View className="flex-row items-center">
+                <Ionicons name="checkmark-done-circle-outline" size={24} color={colors.accent.pink} />
+                <View className="ml-3">
+                  <ThemedText className="font-semibold">My To-Do Checklist</ThemedText>
+                  <ThemedText variant="secondary" className="text-xs mt-0.5">Track tasks like finding vendors</ThemedText>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.text.secondary} />
+            </ThemedView>
+          </TouchableOpacity>
         </ThemedView>
 
         {/* Recently Liked Vendors */}
@@ -155,9 +265,10 @@ export function ProfileScreen() {
                 <View className="mr-4" style={{ width: 280 }}>
                   <VendorCard
                     vendor={item}
+                    isFavorite={true}
                     onDetailsPress={handleVendorPress}
                     onFavoritePress={() => undefined}
-                    onContactPress={() => undefined}
+                    onContactPress={(id, name) => setContactVendor({ id, name })}
                   />
                 </View>
               )}
@@ -217,7 +328,7 @@ export function ProfileScreen() {
             className="rounded-xl"
             style={{ borderColor: colors.border, borderWidth: 1 }}
           >
-            <TouchableOpacity className="flex-row items-center justify-between px-4 py-4">
+            <TouchableOpacity onPress={() => router.push('/edit-wedding')} className="flex-row items-center justify-between px-4 py-4">
               <View className="flex-row items-center">
                 <Ionicons name="create-outline" size={18} color={colors.text.secondary} />
                 <ThemedText className="ml-3">Edit Wedding Details</ThemedText>
@@ -225,7 +336,7 @@ export function ProfileScreen() {
               <Ionicons name="chevron-forward" size={16} color={colors.text.secondary} />
             </TouchableOpacity>
             <View className="h-px" style={{ backgroundColor: colors.border }} />
-            <TouchableOpacity className="flex-row items-center justify-between px-4 py-4">
+            <TouchableOpacity onPress={() => router.push('/manage-partner')} className="flex-row items-center justify-between px-4 py-4">
               <View className="flex-row items-center">
                 <Ionicons name="people-outline" size={18} color={colors.text.secondary} />
                 <ThemedText className="ml-3">Manage partner</ThemedText>
@@ -233,15 +344,34 @@ export function ProfileScreen() {
               <Ionicons name="chevron-forward" size={16} color={colors.text.secondary} />
             </TouchableOpacity>
             <View className="h-px" style={{ backgroundColor: colors.border }} />
-            <TouchableOpacity className="flex-row items-center justify-between px-4 py-4">
+            <TouchableOpacity onPress={handleLogout} className="flex-row items-center justify-between px-4 py-4">
               <View className="flex-row items-center">
-                <Ionicons name="log-out-outline" size={18} color={colors.text.secondary} />
-                <ThemedText className="ml-3">Logout</ThemedText>
+                <Ionicons name="log-out-outline" size={18} color="#EF4444" />
+                <ThemedText className="ml-3" style={{ color: '#EF4444' }}>Logout</ThemedText>
               </View>
             </TouchableOpacity>
           </ThemedView>
         </ThemedView>
       </ScrollView>
+
+      <ContactModal
+        visible={!!contactVendor}
+        vendorId={contactVendor?.id ?? ''}
+        vendorName={contactVendor?.name ?? ''}
+        onClose={() => setContactVendor(null)}
+      />
+      <GuestsModal
+        visible={showGuests}
+        wedding={mergedWedding as Wedding | null}
+        onClose={() => setShowGuests(false)}
+        onSaved={(data) => setWeddingData((prev) => ({ ...prev, ...data }))}
+      />
+      <BudgetModal
+        visible={showBudget}
+        wedding={mergedWedding as Wedding | null}
+        onClose={() => setShowBudget(false)}
+        onSaved={(data) => setWeddingData((prev) => ({ ...prev, ...data }))}
+      />
     </SafeAreaView>
   );
 }

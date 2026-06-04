@@ -16,6 +16,28 @@ export interface Wedding {
 
   // Progress (derived or stored)
   createdAt: string;
+  partnerEmail?: string;
+
+  // Guests & seating
+  totalGuests?: number;
+  numberOfTables?: number;
+  vipTables?: number;
+
+  // Budget tracking
+  totalBudget?: number;
+  spentBudget?: number;
+  budgetCurrency?: 'EUR' | 'USD' | 'BAM';
+
+  // Booked venue
+  bookedVenueId?: string;
+  bookedVenueName?: string;
+}
+
+export interface ChecklistItem {
+  id: string;
+  text: string;
+  done: boolean;
+  createdAt: string;
 }
 
 export type WeddingStyle =

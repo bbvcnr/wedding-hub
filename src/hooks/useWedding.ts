@@ -23,14 +23,15 @@ export function useWedding(recentLimit = 5): WeddingState {
 
   useEffect(() => {
     if (!weddingId) return;
+    const id = weddingId;
 
     let cancelled = false;
 
     async function load() {
       try {
         const [wedding, favorites] = await Promise.all([
-          getWedding(weddingId),
-          getFavorites(weddingId, recentLimit),
+          getWedding(id),
+          getFavorites(id, recentLimit),
         ]);
 
         const recentVendors = await Promise.all(

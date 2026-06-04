@@ -5,7 +5,9 @@ export interface UserProfile {
   name: string;
   email: string;
   role: 'CLIENT' | 'VENDOR' | 'ORGANIZER' | 'ADMIN';
+  userRole?: 'BRIDE' | 'GROOM';
   weddingId?: string;
+  onboardingComplete?: boolean;
 }
 
 export async function getUserProfile(userId: string): Promise<UserProfile | null> {
@@ -16,4 +18,8 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
 
 export async function createUserProfile(userId: string, profile: UserProfile): Promise<void> {
   await setDoc(doc(db, 'users', userId), profile);
+}
+
+export async function updateUserProfile(userId: string, data: Partial<UserProfile>): Promise<void> {
+  await setDoc(doc(db, 'users', userId), data, { merge: true });
 }

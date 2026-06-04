@@ -35,6 +35,7 @@ export interface HomeContent {
   categories: HomeCategory[];
   hireServices: HireService[];
   featuredVendors: VendorItem[];
+  featuredPhotographers: VendorItem[];
   recentlyLikedVendors: VendorItem[];
   tips: HomeTip[];
   quickActions: QuickAction[];

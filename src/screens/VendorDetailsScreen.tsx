@@ -12,10 +12,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedView, ThemedText } from '@/src/components/theme/themed-view';
 import { ThemedButton } from '@/src/components/theme/themed-button';
+import { ContactModal } from '@/src/components/molecules/ContactModal';
 import { VendorDetails } from '@/src/types/vendor';
 import { ApiService } from '@/src/services/api';
 import { useTheme } from '@/src/components/theme/theme-provider';
+import { useAuth } from '@/src/context/AuthContext';
 import { useRouter } from 'expo-router';
+import { getFavoriteByVendor, addFavorite, removeFavorite, getShortlistByVendor, addToShortlist, removeFromShortlist } from '@/src/services/weddingService';
 
 const { width } = Dimensions.get('window');
 
@@ -26,10 +29,14 @@ interface VendorDetailsScreenProps {
 export function VendorDetailsScreen({ vendorId }: VendorDetailsScreenProps) {
   const { colors, isDark } = useTheme();
   const router = useRouter();
+  const { weddingId } = useAuth();
   const [vendor, setVendor] = useState<VendorDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [likeId, setLikeId] = useState<string | null>(null);
+  const [shortlistId, setShortlistId] = useState<string | null>(null);
+  const [showContact, setShowContact] = useState(false);
 
   useEffect(() => {
     loadVendorDetails();
@@ -43,9 +50,55 @@ export function VendorDetailsScreen({ vendorId }: VendorDetailsScreenProps) {
       setVendor(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load vendor details');
-      console.error('Error loading vendor details:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!weddingId) return;
+    getFavoriteByVendor(weddingId, vendorId).then((like) => setLikeId(like?.id ?? null));
+    getShortlistByVendor(weddingId, vendorId).then((s) => setShortlistId(s?.id ?? null));
+  }, [weddingId, vendorId]);
+
+  const handleToggleShortlist = async () => {
+    if (!weddingId) return;
+    if (shortlistId) {
+      await removeFromShortlist(weddingId, shortlistId);
+      setShortlistId(null);
+    } else {
+      const id = await addToShortlist(weddingId, vendorId);
+      setShortlistId(id);
+    }
+  };
+
+  const handleBookVenue = async () => {
+    if (!weddingId || !vendor) return;
+    const isBooked = vendor.id === vendorId;
+    Alert.alert(
+      'Book Venue',
+      `Mark "${vendor.name}" as your booked venue?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Mark as Booked', onPress: async () => {
+            const { updateWedding } = await import('@/src/services/weddingService');
+            await updateWedding(weddingId, { bookedVenueId: vendor.id, bookedVenueName: vendor.name });
+            Alert.alert('', `${vendor.name} marked as your booked venue! 🎉`);
+          },
+        },
+      ]
+    );
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!weddingId) return;
+    if (likeId) {
+      await removeFavorite(weddingId, likeId);
+      setLikeId(null);
+    } else {
+      const id = await addFavorite(weddingId, vendorId);
+      setLikeId(id);
     }
   };
 
@@ -171,10 +224,11 @@ export function VendorDetailsScreen({ vendorId }: VendorDetailsScreenProps) {
             <Ionicons name="arrow-back" size={24} color="white" />
           </TouchableOpacity>
           <TouchableOpacity
+            onPress={handleToggleFavorite}
             className="absolute top-4 right-4 p-2 rounded-full"
             style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
           >
-            <Ionicons name="heart-outline" size={24} color="white" />
+            <Ionicons name={likeId ? 'heart' : 'heart-outline'} size={24} color={likeId ? '#EC4899' : 'white'} />
           </TouchableOpacity>
         </View>
 
@@ -421,9 +475,44 @@ export function VendorDetailsScreen({ vendorId }: VendorDetailsScreenProps) {
               />
             )}
 
+            {vendor.category === 'venue' && (
+              <ThemedButton
+                title="Mark as Booked Venue"
+                onPress={handleBookVenue}
+                variant="primary"
+                color="green"
+                size="lg"
+                className="mb-3"
+                leftIcon={<Ionicons name="checkmark-circle-outline" size={18} color="white" />}
+              />
+            )}
+            <ThemedButton
+              title={shortlistId ? 'Remove from Shortlist' : 'Add to Shortlist'}
+              onPress={handleToggleShortlist}
+              variant="outline"
+              color="green"
+              size="lg"
+              className="mb-3"
+              leftIcon={<Ionicons name={shortlistId ? 'bookmark' : 'bookmark-outline'} size={18} color="#14B8A6" />}
+            />
+            <ThemedButton
+              title="Kontaktiraj / Send Inquiry"
+              onPress={() => setShowContact(true)}
+              variant="primary"
+              color="pink"
+              size="lg"
+              leftIcon={<Ionicons name="chatbubble-ellipses-outline" size={18} color="white" />}
+            />
           </ThemedView>
         </ThemedView>
       </ScrollView>
+
+      <ContactModal
+        visible={showContact}
+        vendorId={vendorId}
+        vendorName={vendor.name}
+        onClose={() => setShowContact(false)}
+      />
     </SafeAreaView>
   );
 }
