@@ -6,7 +6,7 @@ import { AuthProvider, useAuth } from "../src/context/AuthContext";
 import './globals.css';
 
 function AuthGate({ children }: { children: React.ReactNode }) {
-  const { user, loading, onboardingComplete } = useAuth();
+  const { user, loading, onboardingComplete, accountType } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
@@ -15,25 +15,37 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 
     const inAuthGroup = segments[0] === '(auth)';
     const inOnboarding = segments[0] === 'onboarding';
-    const inTabs = segments[0] === '(tabs)';
+    const inVendorOnboarding = segments[0] === 'vendor-onboarding';
+    const inVendorGroup = segments[0] === '(vendor)';
+    const inAdminGroup = segments[0] === '(admin)';
 
     if (!user) {
-      // Not logged in → send to login
       if (!inAuthGroup) router.replace('/(auth)/login');
       return;
     }
 
-    // Logged in but onboarding not done
+    if (accountType === 'ADMIN') {
+      if (!inAdminGroup) router.replace('/(admin)/overview');
+      return;
+    }
+
+    if (accountType === 'VENDOR') {
+      if (!onboardingComplete) {
+        if (!inVendorOnboarding) router.replace('/vendor-onboarding');
+      } else if (!inVendorGroup) {
+        router.replace('/(vendor)/dashboard');
+      }
+      return;
+    }
+
+    // CLIENT flow
     if (!onboardingComplete) {
       if (!inOnboarding) router.replace('/onboarding');
       return;
     }
+    if (inAuthGroup || inOnboarding) router.replace('/(tabs)');
 
-    // Logged in + onboarding done → get out of auth/onboarding
-    if (inAuthGroup || inOnboarding) {
-      router.replace('/(tabs)');
-    }
-  }, [user, loading, onboardingComplete, segments]);
+  }, [user, loading, onboardingComplete, accountType, segments]);
 
   return <>{children}</>;
 }
@@ -47,7 +59,10 @@ export default function RootLayout() {
             <Stack>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+              <Stack.Screen name="(vendor)" options={{ headerShown: false }} />
+              <Stack.Screen name="(admin)" options={{ headerShown: false }} />
               <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+              <Stack.Screen name="vendor-onboarding" options={{ headerShown: false }} />
               <Stack.Screen name="vendor/[id]" options={{ headerShown: false }} />
               <Stack.Screen name="edit-wedding" options={{ headerShown: false }} />
               <Stack.Screen name="manage-partner" options={{ headerShown: false }} />

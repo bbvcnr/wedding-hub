@@ -106,6 +106,13 @@ export default function LoginScreen() {
                 <Text style={styles.switchLink}>Sign Up</Text>
               </TouchableOpacity>
             </View>
+
+            <TouchableOpacity
+              onPress={() => { setEmail('admin@elenn.app'); }}
+              style={styles.adminHint}
+            >
+              <Text style={styles.adminHintText}>⚙ Admin access</Text>
+            </TouchableOpacity>
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -162,5 +169,15 @@ const styles = StyleSheet.create({
     color: '#F9A8D4',
     fontSize: 14,
     fontWeight: '600',
+  },
+  adminHint: {
+    alignSelf: 'center',
+    marginTop: 24,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  adminHintText: {
+    color: 'rgba(255,255,255,0.3)',
+    fontSize: 12,
   },
 });
