@@ -1,21 +1,13 @@
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  ActivityIndicator,
-  StyleSheet,
+  View, Text, TextInput, TouchableOpacity,
+  KeyboardAvoidingView, Platform, ScrollView,
+  ActivityIndicator, StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ThemedButton } from '@/src/components/theme/themed-button';
 import { SlideBackground } from '@/src/components/SlideBackground';
-
-import { useAuth } from '@/src/context/AuthContext';
+import { useAuth, AccountType } from '@/src/context/AuthContext';
 
 function getAuthError(code: string): string {
   switch (code) {
@@ -30,29 +22,24 @@ export default function RegisterScreen() {
   const { register } = useAuth();
   const router = useRouter();
 
-  const [coupleName, setCoupleName] = useState('');
+  const [accountType, setAccountType] = useState<AccountType | null>(null);
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const namePlaceholder = accountType === 'VENDOR' ? 'Business name' : 'Couple name (e.g. "Ana & Marko")';
+
   const handleRegister = async () => {
-    if (!coupleName.trim()) {
-      setError('Please enter your couple name (e.g. "Ana & Marko").');
-      return;
-    }
-    if (!email.trim()) {
-      setError('Please enter your email.');
-      return;
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
-      return;
-    }
+    if (!accountType) { setError('Please select your account type.'); return; }
+    if (!name.trim()) { setError(`Please enter your ${accountType === 'VENDOR' ? 'business name' : 'couple name'}.`); return; }
+    if (!email.trim()) { setError('Please enter your email.'); return; }
+    if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
     setError('');
     setLoading(true);
     try {
-      await register(email.trim(), password, coupleName.trim());
+      await register(email.trim(), password, name.trim(), accountType);
     } catch (e: any) {
       setError(getAuthError(e?.code ?? ''));
     } finally {
@@ -63,28 +50,36 @@ export default function RegisterScreen() {
   return (
     <SlideBackground>
       <SafeAreaView style={{ flex: 1 }}>
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
-          <ScrollView
-            contentContainerStyle={styles.scroll}
-            keyboardShouldPersistTaps="handled"
-          >
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+
             <Text style={styles.title}>Create account</Text>
-            <Text style={styles.subtitle}>
-              Start planning your perfect wedding day
-            </Text>
+            <Text style={styles.subtitle}>Who are you?</Text>
+
+            {/* Account type selection */}
+            <View style={styles.typeRow}>
+              <TypeCard
+                label="Planning a wedding"
+                emoji="💍"
+                selected={accountType === 'CLIENT'}
+                onPress={() => setAccountType('CLIENT')}
+              />
+              <TypeCard
+                label="I'm a vendor"
+                emoji="🏪"
+                selected={accountType === 'VENDOR'}
+                onPress={() => setAccountType('VENDOR')}
+              />
+            </View>
 
             <TextInput
               style={styles.input}
-              placeholder='Couple name (e.g. "Ana & Marko")'
+              placeholder={namePlaceholder}
               placeholderTextColor="rgba(255,255,255,0.5)"
-              value={coupleName}
-              onChangeText={setCoupleName}
-              autoCapitalize="words"
+              value={name}
+              onChangeText={setName}
+              autoCapitalize={accountType === 'VENDOR' ? 'words' : 'words'}
             />
-
             <TextInput
               style={styles.input}
               placeholder="Email"
@@ -95,7 +90,6 @@ export default function RegisterScreen() {
               keyboardType="email-address"
               autoComplete="email"
             />
-
             <TextInput
               style={styles.input}
               placeholder="Password (min. 6 characters)"
@@ -108,14 +102,17 @@ export default function RegisterScreen() {
 
             {error ? <Text style={styles.error}>{error}</Text> : null}
 
-            <ThemedButton
-              title={loading ? '' : 'Create Account'}
+            <TouchableOpacity
+              style={[styles.button, { opacity: loading ? 0.7 : 1 }]}
               onPress={handleRegister}
               disabled={loading}
-              size="lg"
-              style={styles.button}
-              leftIcon={loading ? <ActivityIndicator color="#fff" size="small" /> : undefined}
-            />
+              activeOpacity={0.85}
+            >
+              {loading
+                ? <ActivityIndicator color="#fff" />
+                : <Text style={styles.buttonText}>Create Account</Text>
+              }
+            </TouchableOpacity>
 
             <View style={styles.switchRow}>
               <Text style={styles.switchText}>Already have an account? </Text>
@@ -130,54 +127,41 @@ export default function RegisterScreen() {
   );
 }
 
+function TypeCard({ label, emoji, selected, onPress }: { label: string; emoji: string; selected: boolean; onPress: () => void }) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.8}
+      style={[styles.typeCard, selected && styles.typeCardSelected]}
+    >
+      <Text style={styles.typeEmoji}>{emoji}</Text>
+      <Text style={[styles.typeLabel, { color: selected ? '#fff' : 'rgba(255,255,255,0.8)' }]}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
 const styles = StyleSheet.create({
-  scroll: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: 28,
+  scroll: { flexGrow: 1, justifyContent: 'center', padding: 28, paddingBottom: 48 },
+  title: { fontSize: 34, fontWeight: '700', color: '#FFFFFF', marginBottom: 6 },
+  subtitle: { fontSize: 15, color: 'rgba(255,255,255,0.75)', marginBottom: 20 },
+  typeRow: { flexDirection: 'row', gap: 12, marginBottom: 20 },
+  typeCard: {
+    flex: 1, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.3)',
+    borderRadius: 16, paddingVertical: 18, alignItems: 'center', gap: 8,
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
-  title: {
-    fontSize: 38,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: 'rgba(255,255,255,0.75)',
-    marginBottom: 40,
-    lineHeight: 22,
-  },
+  typeCardSelected: { borderColor: '#EC4899', backgroundColor: '#EC4899' },
+  typeEmoji: { fontSize: 30 },
+  typeLabel: { fontSize: 13, fontWeight: '600', textAlign: 'center' },
   input: {
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.3)',
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 16,
-    color: '#FFFFFF',
-    marginBottom: 12,
+    backgroundColor: 'rgba(255,255,255,0.15)', borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)', borderRadius: 12,
+    padding: 14, fontSize: 16, color: '#FFFFFF', marginBottom: 12,
   },
-  error: {
-    color: '#FCA5A5',
-    fontSize: 13,
-    marginBottom: 12,
-  },
-  button: {
-    marginTop: 8,
-  },
-  switchRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 24,
-  },
-  switchText: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 14,
-  },
-  switchLink: {
-    color: '#F9A8D4',
-    fontSize: 14,
-    fontWeight: '600',
-  },
+  error: { color: '#FCA5A5', fontSize: 13, marginBottom: 12 },
+  button: { backgroundColor: '#EC4899', borderRadius: 14, paddingVertical: 16, alignItems: 'center', marginTop: 4 },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  switchRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
+  switchText: { color: 'rgba(255,255,255,0.7)', fontSize: 14 },
+  switchLink: { color: '#F9A8D4', fontSize: 14, fontWeight: '600' },
 });

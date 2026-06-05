@@ -7,6 +7,7 @@ export interface UserProfile {
   role: 'CLIENT' | 'VENDOR' | 'ORGANIZER' | 'ADMIN';
   userRole?: 'BRIDE' | 'GROOM';
   weddingId?: string;
+  vendorId?: string;
   onboardingComplete?: boolean;
 }
 

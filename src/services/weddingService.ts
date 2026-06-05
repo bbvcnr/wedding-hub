@@ -54,14 +54,20 @@ export async function getFavoriteByVendor(weddingId: string, vendorId: string): 
 export async function addInquiry(
   weddingId: string,
   vendorId: string,
-  message: string
+  message: string,
+  coupleName?: string
 ): Promise<string> {
-  const ref = await addDoc(collection(db, 'weddings', weddingId, 'inquiries'), {
+  const payload = {
     vendorId,
+    weddingId,
     message,
+    coupleName: coupleName ?? '',
     contactedAt: new Date().toISOString(),
     status: 'PENDING',
-  });
+  };
+  const ref = await addDoc(collection(db, 'weddings', weddingId, 'inquiries'), payload);
+  // Mirror to top-level collection so vendors can query their own inquiries
+  await setDoc(doc(db, 'vendorInquiries', ref.id), payload);
   return ref.id;
 }
 

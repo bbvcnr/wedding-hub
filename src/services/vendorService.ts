@@ -3,6 +3,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  setDoc,
   query,
   where,
   orderBy,
@@ -220,4 +221,60 @@ export async function getVendorDetails(vendorId: string): Promise<VendorDetails>
   }
 
   return docToVendorDetails(snap.id, snap.data());
+}
+
+// Vendor self-service profile management
+export interface VendorProfileData {
+  businessName: string;
+  type: string;
+  city: string;
+  shortDescription: string;
+  fullDescription?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  enabled: boolean;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  rating?: number;
+  imageUrl?: string;
+}
+
+export async function getVendorProfile(vendorId: string): Promise<VendorProfileData | null> {
+  const snap = await getDoc(doc(db, VENDORS, vendorId));
+  if (!snap.exists()) return null;
+  return snap.data() as VendorProfileData;
+}
+
+export async function createVendorProfile(vendorId: string, data: Omit<VendorProfileData, 'enabled' | 'status'>): Promise<void> {
+  await setDoc(doc(db, VENDORS, vendorId), {
+    ...data,
+    enabled: false,
+    status: 'PENDING',
+    createdAt: new Date().toISOString(),
+  });
+}
+
+export async function updateVendorProfile(vendorId: string, data: Partial<VendorProfileData>): Promise<void> {
+  await setDoc(doc(db, VENDORS, vendorId), data, { merge: true });
+}
+
+// Vendor inquiries — top-level collection for cross-wedding queries
+export interface VendorInquiryRecord {
+  id: string;
+  vendorId: string;
+  weddingId: string;
+  coupleName?: string;
+  message: string;
+  contactedAt: string;
+  status: 'PENDING' | 'REPLIED' | 'BOOKED';
+}
+
+export async function getVendorInquiries(vendorId: string): Promise<VendorInquiryRecord[]> {
+  const q = query(
+    collection(db, 'vendorInquiries'),
+    where('vendorId', '==', vendorId),
+    orderBy('contactedAt', 'desc')
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as VendorInquiryRecord));
 }
