@@ -43,7 +43,10 @@ export function useWedding(recentLimit = 5): WeddingState {
 
   // Initial load on mount
   useEffect(() => {
-    if (!weddingId) return;
+    if (!weddingId) {
+      setState({ loading: false, wedding: null, favorites: [], recentVendors: [] });
+      return;
+    }
     loadData(weddingId);
   }, [weddingId, recentLimit]);
 

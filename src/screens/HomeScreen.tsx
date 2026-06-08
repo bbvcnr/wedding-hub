@@ -26,7 +26,7 @@ export function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const tabBarOffset = 32 + insets.bottom;
-  const { wedding } = useWedding();
+  const { wedding, loading: weddingLoading } = useWedding();
   const { weddingId } = useAuth();
 
   const [favoritesMap, setFavoritesMap] = useState<Map<string, string>>(new Map());
@@ -72,6 +72,7 @@ export function HomeScreen() {
             coupleName={wedding?.coupleName ?? mockHomeContent.coupleName}
             weddingDate={wedding?.weddingDate ?? mockHomeContent.weddingDate}
             hasWedding={!!wedding}
+            isLoading={weddingLoading}
           />
         </ThemedView>
 

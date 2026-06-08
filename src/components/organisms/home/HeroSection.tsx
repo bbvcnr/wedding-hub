@@ -8,6 +8,7 @@ interface HeroSectionProps {
   coupleName?: string;
   weddingDate?: string;
   hasWedding: boolean;
+  isLoading?: boolean;
 }
 
 const formatWeddingDate = (date?: string) => {
@@ -27,10 +28,21 @@ const getDaysUntil = (date?: string) => {
   return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
 };
 
-export function HeroSection({ coupleName, weddingDate, hasWedding }: HeroSectionProps) {
+export function HeroSection({ coupleName, weddingDate, hasWedding, isLoading = false }: HeroSectionProps) {
   const { colors } = useTheme();
   const dateLabel = useMemo(() => formatWeddingDate(weddingDate), [weddingDate]);
   const daysUntil = useMemo(() => getDaysUntil(weddingDate), [weddingDate]);
+
+  if (isLoading) {
+    return (
+      <ThemedView variant="card" className="px-5 py-6 rounded-2xl">
+        <ThemedText className="text-xl font-semibold">Loading your wedding...</ThemedText>
+        <ThemedText variant="secondary" className="mt-2">
+          Preparing your personalized dashboard.
+        </ThemedText>
+      </ThemedView>
+    );
+  }
 
   if (!hasWedding) {
     return (
