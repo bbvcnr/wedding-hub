@@ -158,11 +158,32 @@ export function ProfileScreen() {
         {/* Planning Stats */}
         <ThemedView variant="background" className="px-6 pt-2">
           <ThemedText className="text-lg font-semibold mb-3">Your Progress</ThemedText>
-          <View className="flex-row gap-3">
-            {stats.map((stat) => (
-              <StatCard key={stat.label} {...stat} onPress={stat.onPress} />
-            ))}
-          </View>
+          {favorites.length === 0 ? (
+            <ThemedView
+              variant="card"
+              className="rounded-xl px-6 py-8 items-center"
+              style={{ borderColor: colors.border, borderWidth: 1 }}
+            >
+              <Ionicons name="rocket-outline" size={40} color={colors.accent.pink} />
+              <ThemedText className="text-lg font-semibold mt-3 text-center">Get Started</ThemedText>
+              <ThemedText variant="secondary" className="text-sm mt-2 text-center">
+                Start exploring vendors and save your favorites to begin planning
+              </ThemedText>
+              <ThemedButton
+                title="Explore Vendors"
+                variant="primary"
+                color="pink"
+                onPress={() => router.push('/(tabs)/search')}
+                className="mt-4 w-full"
+              />
+            </ThemedView>
+          ) : (
+            <View className="flex-row gap-3">
+              {stats.map((stat) => (
+                <StatCard key={stat.label} {...stat} onPress={stat.onPress} />
+              ))}
+            </View>
+          )}
         </ThemedView>
 
         {/* Guests & Seating */}
@@ -173,14 +194,32 @@ export function ProfileScreen() {
               <Ionicons name="create-outline" size={20} color={colors.accent.pink} />
             </TouchableOpacity>
           </View>
-          <ThemedView variant="card" className="rounded-xl px-4 py-4" style={{ borderColor: colors.border, borderWidth: 1 }}>
-            <View className="flex-row justify-between mb-3">
-              <InfoCell label="Total Guests" value={mergedWedding?.totalGuests?.toString() ?? '—'} />
-              <InfoCell label="Tables" value={mergedWedding?.numberOfTables?.toString() ?? '—'} />
-              <InfoCell label="VIP Tables" value={mergedWedding?.vipTables?.toString() ?? '—'} />
-              <InfoCell label="Per Table" value={guestsPerTable?.toString() ?? '—'} highlight />
-            </View>
-          </ThemedView>
+          {!mergedWedding?.totalGuests ? (
+            <ThemedView
+              variant="card"
+              className="rounded-xl px-4 py-6 items-center"
+              style={{ borderColor: colors.border, borderWidth: 1 }}
+            >
+              <Ionicons name="people-outline" size={32} color={colors.accent.pink} />
+              <ThemedText className="text-base font-semibold mt-2 text-center">Add guest details</ThemedText>
+              <ThemedText variant="secondary" className="text-xs mt-2 text-center">Plan seating and track your guest count</ThemedText>
+              <ThemedButton
+                title="Edit Details"
+                size="sm"
+                onPress={() => setShowGuests(true)}
+                className="mt-3"
+              />
+            </ThemedView>
+          ) : (
+            <ThemedView variant="card" className="rounded-xl px-4 py-4" style={{ borderColor: colors.border, borderWidth: 1 }}>
+              <View className="flex-row justify-between mb-3">
+                <InfoCell label="Total Guests" value={mergedWedding?.totalGuests?.toString() ?? '—'} />
+                <InfoCell label="Tables" value={mergedWedding?.numberOfTables?.toString() ?? '—'} />
+                <InfoCell label="VIP Tables" value={mergedWedding?.vipTables?.toString() ?? '—'} />
+                <InfoCell label="Per Table" value={guestsPerTable?.toString() ?? '—'} highlight />
+              </View>
+            </ThemedView>
+          )}
         </ThemedView>
 
         {/* Budget */}
@@ -191,18 +230,36 @@ export function ProfileScreen() {
               <Ionicons name="create-outline" size={20} color={colors.accent.pink} />
             </TouchableOpacity>
           </View>
-          <ThemedView variant="card" className="rounded-xl px-4 py-4" style={{ borderColor: colors.border, borderWidth: 1 }}>
-            <View className="flex-row justify-between">
-              <InfoCell label="Total" value={mergedWedding?.totalBudget ? `${mergedWedding.budgetCurrency ?? 'EUR'} ${mergedWedding.totalBudget.toLocaleString()}` : '—'} />
-              <InfoCell label="Spent" value={mergedWedding?.spentBudget ? `${mergedWedding.budgetCurrency ?? 'EUR'} ${mergedWedding.spentBudget.toLocaleString()}` : '—'} />
-              <InfoCell
-                label="Remaining"
-                value={remainingBudget != null ? `${mergedWedding?.budgetCurrency ?? 'EUR'} ${Math.abs(remainingBudget).toLocaleString()}` : '—'}
-                highlight
-                negative={remainingBudget !== null && remainingBudget < 0}
+          {!mergedWedding?.totalBudget ? (
+            <ThemedView
+              variant="card"
+              className="rounded-xl px-4 py-6 items-center"
+              style={{ borderColor: colors.border, borderWidth: 1 }}
+            >
+              <Ionicons name="wallet-outline" size={32} color={colors.accent.pink} />
+              <ThemedText className="text-base font-semibold mt-2 text-center">Set your budget</ThemedText>
+              <ThemedText variant="secondary" className="text-xs mt-2 text-center">Track spending and stay within budget</ThemedText>
+              <ThemedButton
+                title="Edit Details"
+                size="sm"
+                onPress={() => setShowBudget(true)}
+                className="mt-3"
               />
-            </View>
-          </ThemedView>
+            </ThemedView>
+          ) : (
+            <ThemedView variant="card" className="rounded-xl px-4 py-4" style={{ borderColor: colors.border, borderWidth: 1 }}>
+              <View className="flex-row justify-between">
+                <InfoCell label="Total" value={mergedWedding?.totalBudget ? `${mergedWedding.budgetCurrency ?? 'EUR'} ${mergedWedding.totalBudget.toLocaleString()}` : '—'} />
+                <InfoCell label="Spent" value={mergedWedding?.spentBudget ? `${mergedWedding.budgetCurrency ?? 'EUR'} ${mergedWedding.spentBudget.toLocaleString()}` : '—'} />
+                <InfoCell
+                  label="Remaining"
+                  value={remainingBudget != null ? `${mergedWedding?.budgetCurrency ?? 'EUR'} ${Math.abs(remainingBudget).toLocaleString()}` : '—'}
+                  highlight
+                  negative={remainingBudget !== null && remainingBudget < 0}
+                />
+              </View>
+            </ThemedView>
+          )}
         </ThemedView>
 
         {/* Booked Venue */}
@@ -295,6 +352,14 @@ export function ProfileScreen() {
               <ThemedText className="font-semibold">
                 {wedding?.guestCountRange
                   ? `${wedding.guestCountRange.min}-${wedding.guestCountRange.max}`
+                  : 'Not set'}
+              </ThemedText>
+            </View>
+            <View className="flex-row items-center justify-between mt-3">
+              <ThemedText variant="secondary">Budget preference</ThemedText>
+              <ThemedText className="font-semibold">
+                {wedding?.budgetRange
+                  ? `${wedding.budgetRange.currency} ${wedding.budgetRange.min?.toLocaleString() || '0'}-${wedding.budgetRange.max?.toLocaleString() || '0'}`
                   : 'Not set'}
               </ThemedText>
             </View>
