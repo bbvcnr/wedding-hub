@@ -21,7 +21,7 @@ function TabIcon({ focused, name, label }: { focused: boolean; name: keyof typeo
   );
 }
 
-export default function AdminLayout() {
+export default function OrganizerLayout() {
   const { isDark } = useTheme();
 
   return (
@@ -31,38 +31,47 @@ export default function AdminLayout() {
         <BlurView
           tint={isDark ? 'dark' : 'light'}
           intensity={20}
-          style={[StyleSheet.absoluteFill, { backgroundColor: isDark ? 'rgba(20,10,10,0.95)' : 'rgba(255,248,248,0.95)' }]}
+          style={[StyleSheet.absoluteFill, { backgroundColor: isDark ? 'rgba(31,31,31,0.9)' : 'rgba(248,250,252,0.9)' }]}
         />
       ),
       tabBarItemStyle: { width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' },
       tabBarStyle: {
         backgroundColor: 'transparent', borderRadius: 50,
-        marginHorizontal: 20, marginBottom: 20, height: 52,
+        marginHorizontal: 20, marginBottom: 20, height: 48,
         position: 'absolute', overflow: 'hidden',
-        borderWidth: 1, borderColor: isDark ? '#4A1A1A' : '#F9A8D4',
+        borderWidth: 1, borderColor: isDark ? '#333333' : 'white',
       },
     }}>
-      <Tabs.Screen name="overview" options={{
-        headerShown: false,
-        tabBarIcon: ({ focused }) => <TabIcon focused={focused} name="stats-chart" label="Overview" />,
-      }} />
-      <Tabs.Screen name="users" options={{
-        headerShown: false,
-        tabBarIcon: ({ focused }) => <TabIcon focused={focused} name="people" label="Users" />,
-      }} />
-      <Tabs.Screen name="vendors" options={{
-        headerShown: false,
-        tabBarIcon: ({ focused }) => <TabIcon focused={focused} name="storefront" label="Vendors" />,
-      }} />
+      <Tabs.Screen
+        name="dashboard"
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ focused }) => <TabIcon focused={focused} name="briefcase-outline" label="Weddings" />,
+        }}
+      />
+      <Tabs.Screen
+        name="invites"
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ focused }) => <TabIcon focused={focused} name="mail-open-outline" label="Invites" />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ focused }) => <TabIcon focused={focused} name="person-outline" label="Profile" />,
+        }}
+      />
     </Tabs>
   );
 }
 
 const styles = StyleSheet.create({
   activeTab: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: '#DC2626', borderRadius: 1000,
-    paddingHorizontal: 18, paddingVertical: 9, minWidth: 120, minHeight: 52,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly',
+    backgroundColor: '#EC4899', borderRadius: 999,
+    paddingHorizontal: 18, paddingVertical: 16, minWidth: 120, minHeight: 50,
   },
   inactiveTab: { alignItems: 'center', justifyContent: 'center' },
 });

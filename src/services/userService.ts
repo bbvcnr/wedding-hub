@@ -1,13 +1,23 @@
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from './firebase';
 
+export interface OrganizerPreferences {
+  preferredWeddingTypes?: string[];
+  preferredCities?: string[];
+  bio?: string;
+}
+
 export interface UserProfile {
   name: string;
   email: string;
+  emailLower?: string;
   role: 'CLIENT' | 'VENDOR' | 'ORGANIZER' | 'ADMIN';
   userRole?: 'BRIDE' | 'GROOM';
   weddingId?: string;
   vendorId?: string;
+  organizerWeddingIds?: string[];
+  activeWeddingId?: string | null;
+  organizerPreferences?: OrganizerPreferences;
   onboardingComplete?: boolean;
 }
 

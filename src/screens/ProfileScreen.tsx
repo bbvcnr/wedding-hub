@@ -11,6 +11,7 @@ import { BudgetModal } from '@/src/components/molecules/BudgetModal';
 import { ContactModal } from '@/src/components/molecules/ContactModal';
 import { useTheme } from '@/src/components/theme/theme-provider';
 import { useWedding } from '@/src/hooks/useWedding';
+import { useAuth } from '@/src/context/AuthContext';
 import { Wedding } from '@/src/types/profile';
 
 const formatWeddingDate = (date?: string) => {
@@ -74,6 +75,8 @@ export function ProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const tabBarOffset = 54;
+  const { accountType, setActiveWeddingId } = useAuth();
+  const isOrganizerViewer = accountType === 'ORGANIZER';
   const { loading, wedding, favorites, recentVendors } = useWedding(5);
   const [weddingData, setWeddingData] = useState<Partial<Wedding>>({});
   const [showGuests, setShowGuests] = useState(false);
@@ -106,6 +109,11 @@ export function ProfileScreen() {
     router.push(`/vendor/${vendorId}`);
   };
 
+  const handleBackToOrganizerDashboard = async () => {
+    await setActiveWeddingId(null);
+    router.replace('/(organizer)/dashboard' as any);
+  };
+
   if (loading && !wedding) {
     return (
       <SafeAreaView edges={['top', 'left', 'right']} className="flex-1" style={{ backgroundColor: colors.background }}>
@@ -125,6 +133,29 @@ export function ProfileScreen() {
   return (
     <SafeAreaView edges={['top', 'left', 'right']} className="flex-1" style={{ backgroundColor: colors.background }}>
       <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 32 + tabBarOffset }}>
+        {isOrganizerViewer && (
+          <ThemedView variant="background" style={{ paddingHorizontal: 24, paddingTop: 12 }}>
+            <TouchableOpacity
+              onPress={handleBackToOrganizerDashboard}
+              activeOpacity={0.85}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                alignSelf: 'flex-start',
+                backgroundColor: colors.accent.pink + '18',
+                borderRadius: 999,
+                paddingHorizontal: 12,
+                paddingVertical: 8,
+              }}
+            >
+              <Ionicons name="arrow-back" size={14} color={colors.accent.pink} />
+              <ThemedText style={{ marginLeft: 6, color: colors.accent.pink, fontWeight: '700' }}>
+                Back to Organizer Dashboard
+              </ThemedText>
+            </TouchableOpacity>
+          </ThemedView>
+        )}
+
         {/* Wedding Header */}
         <ThemedView variant="background" style={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 16, alignItems: 'center' }}>
           <ThemedText style={{ fontSize: 38, fontWeight: '800', textAlign: 'center', letterSpacing: -0.5 }}>
@@ -180,11 +211,7 @@ export function ProfileScreen() {
           <View style={{ flexDirection: 'row', gap: 12 }}>
 
             {/* Guests & Seating */}
-            <TouchableOpacity
-              onPress={() => setShowGuests(true)}
-              activeOpacity={0.82}
-              style={{ flex: 1, borderRadius: 18, backgroundColor: colors.accent.blue, padding: 18, minHeight: 140 }}
-            >
+            <View style={{ flex: 1, borderRadius: 18, backgroundColor: colors.accent.blue, padding: 18, minHeight: 140 }}>
               <View style={{ width: 28, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.45)', marginBottom: 12 }} />
               <Ionicons name="people-outline" size={22} color="rgba(255,255,255,0.7)" />
               <Text style={{ color: '#fff', fontSize: 15, fontWeight: '800', marginTop: 10, lineHeight: 21 }}>
@@ -201,17 +228,16 @@ export function ProfileScreen() {
                 </>
               ) : (
                 <Text style={{ color: 'rgba(255,255,255,0.65)', fontSize: 12, marginTop: 6, lineHeight: 17 }}>
-                  Tap to add guest details
+                  {isOrganizerViewer ? 'View only' : 'Tap to add guest details'}
                 </Text>
               )}
-            </TouchableOpacity>
+              {!isOrganizerViewer && (
+                <TouchableOpacity onPress={() => setShowGuests(true)} activeOpacity={0.82} style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }} />
+              )}
+            </View>
 
             {/* Budget */}
-            <TouchableOpacity
-              onPress={() => setShowBudget(true)}
-              activeOpacity={0.82}
-              style={{ flex: 1, borderRadius: 18, backgroundColor: colors.accent.green, padding: 18, minHeight: 140 }}
-            >
+            <View style={{ flex: 1, borderRadius: 18, backgroundColor: colors.accent.green, padding: 18, minHeight: 140 }}>
               <View style={{ width: 28, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.45)', marginBottom: 12 }} />
               <Ionicons name="wallet-outline" size={22} color="rgba(255,255,255,0.7)" />
               <Text style={{ color: '#fff', fontSize: 15, fontWeight: '800', marginTop: 10, lineHeight: 21 }}>
@@ -230,10 +256,13 @@ export function ProfileScreen() {
                 </>
               ) : (
                 <Text style={{ color: 'rgba(255,255,255,0.65)', fontSize: 12, marginTop: 6, lineHeight: 17 }}>
-                  Tap to set your budget
+                  {isOrganizerViewer ? 'View only' : 'Tap to set your budget'}
                 </Text>
               )}
-            </TouchableOpacity>
+              {!isOrganizerViewer && (
+                <TouchableOpacity onPress={() => setShowBudget(true)} activeOpacity={0.82} style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }} />
+              )}
+            </View>
 
           </View>
         </ThemedView>
@@ -249,24 +278,25 @@ export function ProfileScreen() {
           </ThemedView>
         )}
 
-        {/* Checklist */}
-        <ThemedView variant="background" className="px-6 pt-6">
-          <TouchableOpacity
-            onPress={() => router.push('/checklist')}
-            activeOpacity={0.8}
-          >
-            <ThemedView variant="card" className="rounded-xl px-4 py-4 flex-row items-center justify-between">
-              <View className="flex-row items-center">
-                <Ionicons name="checkmark-done-circle-outline" size={24} color={colors.accent.green} />
-                <View className="ml-3">
-                  <ThemedText className="font-semibold">My To-Do Checklist</ThemedText>
-                  <ThemedText variant="secondary" className="text-xs mt-0.5">Track tasks like finding vendors</ThemedText>
+        {!isOrganizerViewer && (
+          <ThemedView variant="background" className="px-6 pt-6">
+            <TouchableOpacity
+              onPress={() => router.push('/checklist')}
+              activeOpacity={0.8}
+            >
+              <ThemedView variant="card" className="rounded-xl px-4 py-4 flex-row items-center justify-between">
+                <View className="flex-row items-center">
+                  <Ionicons name="checkmark-done-circle-outline" size={24} color={colors.accent.green} />
+                  <View className="ml-3">
+                    <ThemedText className="font-semibold">My To-Do Checklist</ThemedText>
+                    <ThemedText variant="secondary" className="text-xs mt-0.5">Track tasks like finding vendors</ThemedText>
+                  </View>
                 </View>
-              </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.text.secondary} />
-            </ThemedView>
-          </TouchableOpacity>
-        </ThemedView>
+                <Ionicons name="chevron-forward" size={18} color={colors.text.secondary} />
+              </ThemedView>
+            </TouchableOpacity>
+          </ThemedView>
+        )}
 
         {/* Recently Liked Vendors */}
         <ThemedView variant="background" className="px-6 pt-6">
@@ -338,38 +368,43 @@ export function ProfileScreen() {
           </ThemedView>
         </ThemedView>
 
-        {/* Settings shortcut */}
-        <ThemedView variant="background" className="px-6 pt-6">
-          <ThemedView variant="card" className="rounded-xl">
-            <TouchableOpacity onPress={() => router.push('/settings')} className="flex-row items-center justify-between px-4 py-4">
-              <View className="flex-row items-center">
-                <Ionicons name="settings-outline" size={18} color={colors.text.secondary} />
-                <ThemedText className="ml-3">Settings</ThemedText>
-              </View>
-              <Ionicons name="chevron-forward" size={16} color={colors.text.secondary} />
-            </TouchableOpacity>
+        {!isOrganizerViewer && (
+          <ThemedView variant="background" className="px-6 pt-6">
+            <ThemedView variant="card" className="rounded-xl">
+              <TouchableOpacity onPress={() => router.push('/settings')} className="flex-row items-center justify-between px-4 py-4">
+                <View className="flex-row items-center">
+                  <Ionicons name="settings-outline" size={18} color={colors.text.secondary} />
+                  <ThemedText className="ml-3">Settings</ThemedText>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.text.secondary} />
+              </TouchableOpacity>
+            </ThemedView>
           </ThemedView>
-        </ThemedView>
+        )}
       </ScrollView>
 
-      <ContactModal
-        visible={!!contactVendor}
-        vendorId={contactVendor?.id ?? ''}
-        vendorName={contactVendor?.name ?? ''}
-        onClose={() => setContactVendor(null)}
-      />
-      <GuestsModal
-        visible={showGuests}
-        wedding={mergedWedding as Wedding | null}
-        onClose={() => setShowGuests(false)}
-        onSaved={(data) => setWeddingData((prev) => ({ ...prev, ...data }))}
-      />
-      <BudgetModal
-        visible={showBudget}
-        wedding={mergedWedding as Wedding | null}
-        onClose={() => setShowBudget(false)}
-        onSaved={(data) => setWeddingData((prev) => ({ ...prev, ...data }))}
-      />
+      {!isOrganizerViewer && (
+        <>
+          <ContactModal
+            visible={!!contactVendor}
+            vendorId={contactVendor?.id ?? ''}
+            vendorName={contactVendor?.name ?? ''}
+            onClose={() => setContactVendor(null)}
+          />
+          <GuestsModal
+            visible={showGuests}
+            wedding={mergedWedding as Wedding | null}
+            onClose={() => setShowGuests(false)}
+            onSaved={(data) => setWeddingData((prev) => ({ ...prev, ...data }))}
+          />
+          <BudgetModal
+            visible={showBudget}
+            wedding={mergedWedding as Wedding | null}
+            onClose={() => setShowBudget(false)}
+            onSaved={(data) => setWeddingData((prev) => ({ ...prev, ...data }))}
+          />
+        </>
+      )}
     </SafeAreaView>
   );
 }
