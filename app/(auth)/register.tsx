@@ -29,11 +29,19 @@ export default function RegisterScreen() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const namePlaceholder = accountType === 'VENDOR' ? 'Business name' : 'Couple name (e.g. "Ana & Marko")';
+  const namePlaceholder =
+    accountType === 'VENDOR'
+      ? 'Business name'
+      : accountType === 'ORGANIZER'
+        ? 'Full name'
+        : 'Couple name (e.g. "Ana & Marko")';
 
   const handleRegister = async () => {
     if (!accountType) { setError('Please select your account type.'); return; }
-    if (!name.trim()) { setError(`Please enter your ${accountType === 'VENDOR' ? 'business name' : 'couple name'}.`); return; }
+    if (!name.trim()) {
+      setError(`Please enter your ${accountType === 'VENDOR' ? 'business name' : accountType === 'ORGANIZER' ? 'name' : 'couple name'}.`);
+      return;
+    }
     if (!email.trim()) { setError('Please enter your email.'); return; }
     if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
     setError('');
@@ -69,6 +77,12 @@ export default function RegisterScreen() {
                 emoji="🏪"
                 selected={accountType === 'VENDOR'}
                 onPress={() => setAccountType('VENDOR')}
+              />
+              <TypeCard
+                label="I'm an organizer"
+                emoji="🗓️"
+                selected={accountType === 'ORGANIZER'}
+                onPress={() => setAccountType('ORGANIZER')}
               />
             </View>
 

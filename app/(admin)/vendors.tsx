@@ -137,7 +137,7 @@ export default function AdminVendorsScreen() {
                       <ThemedText style={{ fontSize: 12, fontWeight: '700', marginLeft: 4, color: '#065F46' }}>Approve</ThemedText>
                     </TouchableOpacity>
                   )}
-                  {item.data.status !== 'REJECTED' && (
+                  {item.data.status === 'PENDING' && (
                     <TouchableOpacity onPress={() => handleReject(item)} style={[styles.actionBtn, { backgroundColor: '#FEF3C7', borderColor: '#F59E0B' }]}>
                       <Ionicons name="close-circle" size={14} color="#F59E0B" />
                       <ThemedText style={{ fontSize: 12, fontWeight: '700', marginLeft: 4, color: '#92400E' }}>Reject</ThemedText>

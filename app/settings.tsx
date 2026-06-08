@@ -79,13 +79,27 @@ function Card({ children }: { children: React.ReactNode }) {
 export default function SettingsScreen() {
   const { colors } = useTheme();
   const { theme, setTheme } = useTheme();
-  const { user, logout } = useAuth();
+  const { user, logout, accountType, weddingId, setActiveWeddingId } = useAuth();
   const router = useRouter();
 
   const handleLogout = () => {
     Alert.alert('Log Out', 'Are you sure you want to log out?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Log Out', style: 'destructive', onPress: () => logout() },
+    ]);
+  };
+
+  const handleLeaveWeddingWorkspace = () => {
+    Alert.alert('Leave Wedding Workspace', 'Go back to Organizer Dashboard?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Leave',
+        style: 'destructive',
+        onPress: async () => {
+          await setActiveWeddingId(null);
+          router.replace('/(organizer)/dashboard' as any);
+        },
+      },
     ]);
   };
 
@@ -165,6 +179,16 @@ export default function SettingsScreen() {
             label="Manage Partner"
             onPress={() => router.push('/manage-partner')}
           />
+          {accountType === 'CLIENT' && (
+            <>
+              <Row
+                icon="briefcase-outline"
+                iconColor={colors.accent.blue}
+                label="Invite Organizer"
+                onPress={() => router.push('/manage-organizer' as any)}
+              />
+            </>
+          )}
           <Row
             icon="checkbox-outline"
             iconColor={colors.accent.green}
@@ -176,8 +200,18 @@ export default function SettingsScreen() {
             iconColor={colors.accent.pink}
             label="Shortlist"
             onPress={() => router.push('/shortlist')}
-            last
+            last={!(accountType === 'ORGANIZER' && !!weddingId)}
           />
+          {accountType === 'ORGANIZER' && !!weddingId && (
+            <Row
+              icon="exit-outline"
+              iconColor="#EF4444"
+              label="Back to Organizer Dashboard"
+              onPress={handleLeaveWeddingWorkspace}
+              destructive
+              last
+            />
+          )}
         </Card>
 
         {/* Support */}

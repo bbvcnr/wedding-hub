@@ -31,6 +31,7 @@ export interface Wedding {
   // Booked venue
   bookedVenueId?: string;
   bookedVenueName?: string;
+  organizerIds?: string[];
 }
 
 export interface ChecklistItem {
