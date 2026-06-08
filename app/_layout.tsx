@@ -1,5 +1,6 @@
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
+import { ActivityIndicator, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from "../src/components/theme/theme-provider";
 import { AuthProvider, useAuth } from "../src/context/AuthContext";
@@ -46,6 +47,14 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     if (inAuthGroup || inOnboarding) router.replace('/(tabs)');
 
   }, [user, loading, onboardingComplete, accountType, segments]);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' }}>
+        <ActivityIndicator size="large" color="#EC4899" />
+      </View>
+    );
+  }
 
   return <>{children}</>;
 }

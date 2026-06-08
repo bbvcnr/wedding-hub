@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ScrollView, View, TouchableOpacity, FlatList, Text } from 'react-native';
+import { ScrollView, View, TouchableOpacity, FlatList, Text, ActivityIndicator } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -105,6 +105,22 @@ export function ProfileScreen() {
   const handleVendorPress = (vendorId: string) => {
     router.push(`/vendor/${vendorId}`);
   };
+
+  if (loading && !wedding) {
+    return (
+      <SafeAreaView edges={['top', 'left', 'right']} className="flex-1" style={{ backgroundColor: colors.background }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }}>
+          <ActivityIndicator size="large" color={colors.accent.pink} />
+          <ThemedText style={{ marginTop: 12, fontSize: 16, fontWeight: '700' }}>
+            Loading your profile...
+          </ThemedText>
+          <ThemedText variant="secondary" style={{ marginTop: 6, textAlign: 'center' }}>
+            We&apos;re fetching your wedding details.
+          </ThemedText>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView edges={['top', 'left', 'right']} className="flex-1" style={{ backgroundColor: colors.background }}>
