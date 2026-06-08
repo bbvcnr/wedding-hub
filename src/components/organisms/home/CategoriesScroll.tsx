@@ -35,8 +35,8 @@ export function CategoriesScroll({ categories, onPressCategory }: CategoriesScro
                   resizeMode="cover"
                 />
               ) : (
-                <View className="flex-1 items-center justify-center">
-                  <Ionicons name={item.icon as any} size={20} color={colors.accent.pink} />
+                <View className="flex-1 items-center justify-center" style={{ backgroundColor: colors.accent.pink + '14' }}>
+                  <Ionicons name={item.icon as any} size={22} color={colors.accent.pink} />
                 </View>
               )}
             </View>

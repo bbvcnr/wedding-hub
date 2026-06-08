@@ -45,26 +45,33 @@ export function HeroSection({ coupleName, weddingDate, hasWedding }: HeroSection
 
   return (
     <ThemedView variant="background" className="items-center">
-      <ThemedText className="text-3xl font-semibold text-center">
+      <ThemedText style={{ fontSize: 38, fontWeight: '800', textAlign: 'center', letterSpacing: -0.5 }}>
         {coupleName || 'Your Wedding'}
       </ThemedText>
       <View className="flex-row items-center mt-2">
-        <Ionicons name="calendar" size={16} color={colors.text.secondary} />
-        <ThemedText variant="secondary" className="ml-2">
+        <Ionicons name="calendar-outline" size={14} color={colors.text.secondary} />
+        <ThemedText variant="secondary" style={{ marginLeft: 6, fontSize: 14 }}>
           {dateLabel || 'Wedding date not set'}
         </ThemedText>
       </View>
       {daysUntil !== null && (
-        <ThemedText variant="accentPink" className="mt-2 text-base">
-          {daysUntil} days to go
-        </ThemedText>
-      )}
-      <View className="flex-row items-center w-full mt-4">
-        <View className="flex-1 h-px" style={{ backgroundColor: colors.border }} />
         <View
-          className="w-2 h-2 rounded-full mx-3"
-          style={{ backgroundColor: colors.accent.pink }}
-        />
+          style={{
+            marginTop: 10,
+            paddingHorizontal: 14,
+            paddingVertical: 5,
+            borderRadius: 20,
+            backgroundColor: colors.accent.pink + '18',
+          }}
+        >
+          <ThemedText style={{ color: colors.accent.pink, fontWeight: '700', fontSize: 13 }}>
+            {daysUntil} days to go
+          </ThemedText>
+        </View>
+      )}
+      <View className="flex-row items-center w-full mt-5">
+        <View className="flex-1 h-px" style={{ backgroundColor: colors.border }} />
+        <Ionicons name="heart" size={12} color={colors.accent.pink} style={{ marginHorizontal: 10 }} />
         <View className="flex-1 h-px" style={{ backgroundColor: colors.border }} />
       </View>
     </ThemedView>

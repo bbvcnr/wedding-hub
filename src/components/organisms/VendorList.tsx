@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { FlatList, ActivityIndicator, RefreshControl, StyleSheet } from 'react-native';
+import { FlatList, ActivityIndicator, RefreshControl, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { VendorCard } from '@/src/components/molecules/VendorCard';
 import { ThemedView, ThemedText } from '@/src/components/theme/themed-view';
 import { VendorItem } from '@/src/types/vendor';
@@ -134,37 +135,35 @@ export function VendorList({
   const renderEmpty = () => {
     if (loading) {
       return (
-        <ThemedView className="flex-1 items-center justify-center py-20">
+        <View style={emptyStyles.wrap}>
           <ActivityIndicator size="large" color="#EC4899" />
-          <ThemedText variant="secondary" className="mt-4">
-            Loading vendors...
-          </ThemedText>
-        </ThemedView>
+          <ThemedText variant="secondary" style={emptyStyles.label}>Loading vendors…</ThemedText>
+        </View>
       );
     }
 
     if (error) {
       return (
-        <ThemedView className="flex-1 items-center justify-center py-20 px-4">
-          <ThemedText className="text-lg font-semibold mb-2 text-center">
-            Error loading vendors
-          </ThemedText>
-          <ThemedText variant="secondary" className="text-center mb-4">
-            {error}
-          </ThemedText>
-        </ThemedView>
+        <View style={emptyStyles.wrap}>
+          <View style={[emptyStyles.iconWrap, { backgroundColor: '#FEE2E2' }]}>
+            <Ionicons name="alert-circle-outline" size={32} color="#EF4444" />
+          </View>
+          <ThemedText style={emptyStyles.title}>Something went wrong</ThemedText>
+          <ThemedText variant="secondary" style={emptyStyles.sub}>{error}</ThemedText>
+        </View>
       );
     }
 
     return (
-      <ThemedView className="flex-1 items-center justify-center py-20 px-4">
-        <ThemedText className="text-lg font-semibold mb-2 text-center">
-          No vendors found
+      <View style={emptyStyles.wrap}>
+        <View style={[emptyStyles.iconWrap, { backgroundColor: '#EC489918' }]}>
+          <Ionicons name="search-outline" size={32} color="#EC4899" />
+        </View>
+        <ThemedText style={emptyStyles.title}>No vendors found</ThemedText>
+        <ThemedText variant="secondary" style={emptyStyles.sub}>
+          Try a different name, city, or category
         </ThemedText>
-        <ThemedText variant="secondary" className="text-center">
-          Try adjusting your search criteria
-        </ThemedText>
-      </ThemedView>
+      </View>
     );
   };
 
@@ -194,8 +193,14 @@ export function VendorList({
 }
 
 const styles = StyleSheet.create({
-  footer: {
-    paddingVertical: 16,
-  },
+  footer: { paddingVertical: 16 },
+});
+
+const emptyStyles = StyleSheet.create({
+  wrap: { alignItems: 'center', justifyContent: 'center', paddingVertical: 80, paddingHorizontal: 32 },
+  iconWrap: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  title: { fontSize: 18, fontWeight: '700', textAlign: 'center', marginBottom: 6 },
+  sub: { fontSize: 14, textAlign: 'center', lineHeight: 20 },
+  label: { marginTop: 12, fontSize: 14 },
 });
 

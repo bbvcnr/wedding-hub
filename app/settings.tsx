@@ -66,11 +66,10 @@ function Row({ icon, iconColor, label, sublabel, onPress, rightEl, destructive, 
 }
 
 function Card({ children }: { children: React.ReactNode }) {
-  const { colors } = useTheme();
   return (
     <ThemedView
       variant="card"
-      style={[styles.card, { borderColor: colors.border }]}
+      style={styles.card}
     >
       {children}
     </ThemedView>
@@ -116,10 +115,11 @@ export default function SettingsScreen() {
                   activeOpacity={0.75}
                   style={[
                     styles.themeOption,
-                    selected && { backgroundColor: colors.accent.pink },
+                    selected
+                      ? { backgroundColor: colors.accent.pink }
+                      : { backgroundColor: colors.background },
                     i === 0 && styles.themeOptionFirst,
                     i === THEME_OPTIONS.length - 1 && styles.themeOptionLast,
-                    { borderColor: selected ? colors.accent.pink : colors.border },
                   ]}
                 >
                   <Ionicons
@@ -143,6 +143,7 @@ export default function SettingsScreen() {
         <Card>
           <Row
             icon="person-outline"
+            iconColor={colors.accent.blue}
             label={user?.displayName ?? 'My Account'}
             sublabel={user?.email ?? undefined}
             last
@@ -154,21 +155,25 @@ export default function SettingsScreen() {
         <Card>
           <Row
             icon="create-outline"
+            iconColor={colors.accent.pink}
             label="Edit Wedding Details"
             onPress={() => router.push('/edit-wedding')}
           />
           <Row
             icon="people-outline"
+            iconColor={colors.accent.blue}
             label="Manage Partner"
             onPress={() => router.push('/manage-partner')}
           />
           <Row
             icon="checkbox-outline"
+            iconColor={colors.accent.green}
             label="Checklist"
             onPress={() => router.push('/checklist')}
           />
           <Row
             icon="bookmark-outline"
+            iconColor={colors.accent.pink}
             label="Shortlist"
             onPress={() => router.push('/shortlist')}
             last
@@ -180,12 +185,14 @@ export default function SettingsScreen() {
         <Card>
           <Row
             icon="mail-outline"
+            iconColor={colors.accent.blue}
             label="Contact Support"
             sublabel="hello@elenn.app"
             onPress={() => Linking.openURL('mailto:hello@elenn.app')}
           />
           <Row
             icon="document-text-outline"
+            iconColor={colors.accent.green}
             label="Privacy Policy"
             onPress={() => Linking.openURL('https://elenn.app/privacy')}
             last
@@ -224,7 +231,7 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 18, fontWeight: '700' },
   scroll: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 48 },
   sectionHeader: { fontSize: 11, fontWeight: '600', letterSpacing: 0.8, marginTop: 20, marginBottom: 6, marginLeft: 4 },
-  card: { borderRadius: 14, borderWidth: 1, overflow: 'hidden' },
+  card: { borderRadius: 14, overflow: 'hidden' },
   row: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 13 },
   iconWrap: { width: 32, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   rowText: { flex: 1 },
@@ -240,7 +247,6 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 10,
     borderRadius: 10,
-    borderWidth: 1.5,
   },
   themeOptionFirst: {},
   themeOptionLast: {},

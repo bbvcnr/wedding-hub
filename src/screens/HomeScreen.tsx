@@ -16,7 +16,6 @@ import {
   CategoriesScroll,
   FeaturedVendorsSection,
   HeroSection,
-  HireServicesCard,
   QuickActions,
   RecentlyLikedSection,
   TipsCarousel,
@@ -77,7 +76,7 @@ export function HomeScreen() {
         </ThemedView>
 
         <ThemedView variant="background" className="px-6 pt-6">
-          <ThemedText className="text-lg font-semibold mb-3">Explore Vendors</ThemedText>
+          <ThemedText style={{ fontSize: 20, fontWeight: '700', marginBottom: 12 }}>Explore Vendors</ThemedText>
           <CategoriesScroll
             categories={mockHomeContent.categories}
             onPressCategory={() => router.push('/(tabs)/search')}
@@ -85,16 +84,7 @@ export function HomeScreen() {
         </ThemedView>
 
         <ThemedView variant="background" className="px-6 pt-6">
-          <ThemedText className="text-lg font-semibold mb-3">Hire Services</ThemedText>
-          <View className="gap-3">
-            {mockHomeContent.hireServices.map((service) => (
-              <HireServicesCard
-                key={service.id}
-                service={service}
-                onPress={() => router.push('/(tabs)/search')}
-              />
-            ))}
-          </View>
+          <TipsCarousel tips={mockHomeContent.tips} />
         </ThemedView>
 
         <ThemedView variant="background" className="px-6 pt-6">
@@ -121,9 +111,6 @@ export function HomeScreen() {
           </ThemedView>
         )}
 
-        <ThemedView variant="background" className="px-6 pt-6">
-          <TipsCarousel tips={mockHomeContent.tips} />
-        </ThemedView>
 
         <ThemedView variant="background" className="px-6 pt-6">
           <RecentlyLikedSection
@@ -134,7 +121,7 @@ export function HomeScreen() {
         </ThemedView>
 
         <ThemedView variant="background" className="px-6 pt-6">
-          <ThemedText className="text-lg font-semibold mb-3">Quick Actions</ThemedText>
+          <ThemedText style={{ fontSize: 20, fontWeight: '700', marginBottom: 12 }}>Quick Actions</ThemedText>
           <QuickActions actions={mockHomeContent.quickActions} onPress={(route) => router.push(route)} />
         </ThemedView>
 

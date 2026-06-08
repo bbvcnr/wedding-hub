@@ -18,6 +18,7 @@ export interface HomeTip {
   id: string;
   title: string;
   description: string;
+  accent: 'pink' | 'blue' | 'green';
 }
 
 export interface QuickAction {

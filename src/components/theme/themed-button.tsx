@@ -6,7 +6,7 @@ interface ThemedButtonProps extends TouchableOpacityProps {
   title: string;
   variant?: 'primary' | 'secondary' | 'outline';
   size?: 'sm' | 'md' | 'lg';
-  color?: 'pink' | 'blue' | 'green';
+  color?: 'pink' | 'blue' | 'green' | 'neutral';
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
 }
@@ -65,10 +65,11 @@ export function ThemedButton({
           variant === 'primary' && color === 'blue' ? '#3B82F6' :
           variant === 'primary' && color === 'green' ? '#14B8A6' :
           variant === 'secondary' ? '#6B7280' : undefined, // Grey for secondary
-        borderColor: 
+        borderColor:
           variant === 'outline' && color === 'pink' ? '#EC4899' :
           variant === 'outline' && color === 'blue' ? '#3B82F6' :
-          variant === 'outline' && color === 'green' ? '#14B8A6' : undefined,
+          variant === 'outline' && color === 'green' ? '#14B8A6' :
+          variant === 'outline' && color === 'neutral' ? '#9CA3AF' : undefined,
         borderWidth: variant === 'outline' ? 1 : undefined, // Only outline has border
       }}
       {...props}
@@ -81,7 +82,8 @@ export function ThemedButton({
             color: (variant === 'primary' || variant === 'secondary') ? '#FFFFFF' : 
                    variant === 'outline' && color === 'pink' ? '#EC4899' :
                    variant === 'outline' && color === 'blue' ? '#3B82F6' :
-                   variant === 'outline' && color === 'green' ? '#14B8A6' : undefined
+                   variant === 'outline' && color === 'green' ? '#14B8A6' :
+                   variant === 'outline' && color === 'neutral' ? '#9CA3AF' : undefined
           }}
         >
           {title}
