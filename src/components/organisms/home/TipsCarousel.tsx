@@ -25,7 +25,8 @@ export function TipsCarousel({ tips }: TipsCarouselProps) {
         keyExtractor={(item) => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingRight: 12 }}
+        style={{ marginHorizontal: -24 }}
+        contentContainerStyle={{ paddingLeft: 24, paddingRight: 16 }}
         renderItem={({ item }) => {
           const shade = ACCENT_SHADES[item.accent];
           return (

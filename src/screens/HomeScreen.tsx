@@ -111,7 +111,6 @@ export function HomeScreen() {
           </ThemedView>
         )}
 
-
         <ThemedView variant="background" className="px-6 pt-6">
           <RecentlyLikedSection
             title="Recently Liked"

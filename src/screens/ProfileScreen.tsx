@@ -261,10 +261,7 @@ export function ProfileScreen() {
             </TouchableOpacity>
           </View>
           {recentVendors.length === 0 ? (
-            <ThemedView
-              variant="card"
-              className="rounded-xl px-4 py-6 items-center"
-            >
+            <ThemedView variant="card" className="rounded-xl px-4 py-6 items-center">
               <ThemedText className="text-sm">No liked vendors yet</ThemedText>
               <ThemedText variant="secondary" className="text-xs mt-2">
                 Start exploring and tap the heart to save vendors.
@@ -276,7 +273,8 @@ export function ProfileScreen() {
               keyExtractor={(item) => item.id}
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingRight: 12 }}
+              style={{ marginHorizontal: -24 }}
+              contentContainerStyle={{ paddingLeft: 24, paddingRight: 16 }}
               renderItem={({ item }) => (
                 <View className="mr-4" style={{ width: 280 }}>
                   <VendorCard

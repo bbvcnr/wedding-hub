@@ -237,8 +237,7 @@ export function VendorDetailsScreen({ vendorId }: VendorDetailsScreenProps) {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            className="px-4 py-2"
-            style={{ backgroundColor: colors.background }}
+            style={{ backgroundColor: colors.background, paddingLeft: 12, paddingVertical: 8 }}
           >
             {vendor.images.map((img, index) => (
               <TouchableOpacity

@@ -175,6 +175,7 @@ export function VendorList({
       contentContainerStyle={{
         padding: 16,
         paddingBottom: 32 + tabBarOffset,
+        gap: 16,
       }}
       onEndReached={handleLoadMore}
       onEndReachedThreshold={0.5}

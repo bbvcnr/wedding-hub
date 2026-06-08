@@ -30,7 +30,8 @@ export function RecentlyLikedSection({ title, vendors, onPressVendor }: Recently
         keyExtractor={(item) => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingRight: 12 }}
+        style={{ marginHorizontal: -24 }}
+        contentContainerStyle={{ paddingLeft: 24, paddingRight: 16 }}
         renderItem={({ item }) => (
           <View className="mr-4" style={{ width: 280 }}>
             <VendorCard

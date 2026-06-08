@@ -70,6 +70,11 @@ export function VendorCard({
   };
 
   return (
+    <TouchableOpacity
+      onPress={() => onDetailsPress?.(vendor.id)}
+      activeOpacity={0.97}
+      style={[styles.cardWrap, { backgroundColor: colors.card }]}
+    >
     <ThemedView variant="card" style={styles.card}>
       {/* Image */}
       <View style={styles.imageContainer}>
@@ -131,37 +136,32 @@ export function VendorCard({
         </ThemedText>
 
         {/* Actions */}
-        <View style={styles.actions}>
-          <TouchableOpacity
-            onPress={() => onDetailsPress?.(vendor.id)}
-            activeOpacity={0.75}
-            style={[styles.btn, { backgroundColor: colors.surface }]}
-          >
-            <ThemedText style={[styles.btnLabel, { color: colors.text.secondary }]}>Details</ThemedText>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => onContactPress?.(vendor.id, vendor.name)}
-            activeOpacity={0.85}
-            style={[styles.btn, { backgroundColor: colors.accent.pink }]}
-          >
-            <Text style={[styles.btnLabel, { color: '#fff' }]}>Contact</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          onPress={(e) => { e.stopPropagation(); onContactPress?.(vendor.id, vendor.name); }}
+          activeOpacity={0.85}
+          style={[styles.contactBtn, { backgroundColor: colors.accent.pink }]}
+        >
+          <Ionicons name="chatbubble-outline" size={14} color="#fff" style={{ marginRight: 6 }} />
+          <Text style={[styles.btnLabel, { color: '#fff' }]}>Contact</Text>
+        </TouchableOpacity>
       </View>
     </ThemedView>
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
+  cardWrap: {
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 14,
+    elevation: 5,
+  },
   card: {
     borderRadius: 20,
     overflow: 'hidden',
-    marginBottom: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
   },
   imageContainer: { position: 'relative', width: '100%' },
   image: { width: '100%', height: 180 },
@@ -200,7 +200,12 @@ const styles = StyleSheet.create({
   metaChip: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   metaLabel: { fontSize: 12 },
   description: { fontSize: 13, lineHeight: 18, marginBottom: 14 },
-  actions: { flexDirection: 'row', gap: 8 },
-  btn: { flex: 1, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  contactBtn: {
+    flexDirection: 'row',
+    height: 38,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   btnLabel: { fontSize: 13, fontWeight: '700' },
 });
