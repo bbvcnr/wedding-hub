@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   ScrollView, View, TextInput, TouchableOpacity,
   ActivityIndicator, StyleSheet, Alert,
+  KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -106,7 +107,17 @@ export default function EditWeddingScreen() {
         <View style={{ width: 24 }} />
       </ThemedView>
 
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 16 : 0}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <ScrollView
+            contentContainerStyle={styles.scroll}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+          >
 
         <ThemedText variant="secondary" className="text-xs font-semibold uppercase mb-2">I am the...</ThemedText>
         <View style={styles.roleRow}>
@@ -176,14 +187,16 @@ export default function EditWeddingScreen() {
           className="mt-8"
           leftIcon={saving ? <ActivityIndicator color="#fff" size="small" /> : undefined}
         />
-      </ScrollView>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 16 },
-  scroll: { padding: 20, paddingBottom: 60 },
+  scroll: { padding: 20, paddingBottom: 120 },
   input: { borderWidth: 1, borderRadius: 10, padding: 13, fontSize: 15, marginBottom: 4 },
   row: { flexDirection: 'row', alignItems: 'center' },
   styleRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },

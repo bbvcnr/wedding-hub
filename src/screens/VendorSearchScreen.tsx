@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   TextInput, TouchableOpacity, KeyboardAvoidingView, Platform,
-  Modal, View, ScrollView, StyleSheet,
+  Modal, View, ScrollView, StyleSheet, Text,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,14 +16,14 @@ import { useRouter } from 'expo-router';
 import { getFavorites, addFavorite, removeFavorite } from '@/src/services/weddingService';
 
 const CATEGORIES = [
-  { label: 'All', value: undefined },
-  { label: 'Venues', value: 'venue' },
-  { label: 'Photography', value: 'photography' },
-  { label: 'Catering', value: 'catering' },
-  { label: 'Entertainment', value: 'entertainment' },
-  { label: 'Beauty', value: 'beauty' },
-  { label: 'Florist', value: 'florist' },
-  { label: 'Planning', value: 'planning' },
+  { label: 'All', value: undefined, icon: 'apps-outline' as const },
+  { label: 'Venues', value: 'venue', icon: 'business-outline' as const },
+  { label: 'Photography', value: 'photography', icon: 'camera-outline' as const },
+  { label: 'Catering', value: 'catering', icon: 'restaurant-outline' as const },
+  { label: 'Entertainment', value: 'entertainment', icon: 'musical-notes-outline' as const },
+  { label: 'Beauty', value: 'beauty', icon: 'sparkles-outline' as const },
+  { label: 'Florist', value: 'florist', icon: 'flower-outline' as const },
+  { label: 'Planning', value: 'planning', icon: 'clipboard-outline' as const },
 ] as const;
 
 const SORT_OPTIONS: { label: string; value: SortBy }[] = [
@@ -38,11 +38,9 @@ export function VendorSearchScreen() {
   const router = useRouter();
   const { weddingId } = useAuth();
 
-  const [locationsInput, setLocationsInput] = useState('');
+  const [nameInput, setNameInput] = useState('');
   const [cityInput, setCityInput] = useState('');
-  const [showMap, setShowMap] = useState(false);
   const [showSort, setShowSort] = useState(false);
-  const [showFilter, setShowFilter] = useState(false);
   const [sortBy, setSortBy] = useState<SortBy>('rating_desc');
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
   const [searchParams, setSearchParams] = useState<Omit<SearchVendorRequest, 'pageRequest'>>({
@@ -61,7 +59,12 @@ export function VendorSearchScreen() {
   useEffect(() => { loadFavorites(); }, [loadFavorites]);
 
   const handleSearch = () => {
-    setSearchParams({ text: locationsInput, city: cityInput, category: selectedCategory, filters: {} });
+    setSearchParams({ text: nameInput, city: cityInput, category: selectedCategory, filters: {} });
+  };
+
+  const handleCategorySelect = (value: string | undefined) => {
+    setSelectedCategory(value);
+    setSearchParams((prev) => ({ ...prev, category: value }));
   };
 
   const handleFavoritePress = async (vendorId: string) => {
@@ -76,99 +79,115 @@ export function VendorSearchScreen() {
     }
   };
 
-  const appliedSortLabel = SORT_OPTIONS.find((o) => o.value === sortBy)?.label ?? 'Sort';
-  const appliedCategoryLabel = CATEGORIES.find((c) => c.value === selectedCategory)?.label;
-  const hasActiveFilter = !!selectedCategory;
-
-  const chipStyle = (active: boolean) => ({
-    borderWidth: 1.5,
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    marginRight: 8,
-    borderColor: active ? '#EC4899' : (isDark ? '#3A3A3C' : '#E5E7EB'),
-    backgroundColor: active ? '#EC4899' : 'transparent',
-  });
+  const isSortActive = sortBy !== 'rating_desc';
 
   return (
-    <SafeAreaView edges={['top', 'left', 'right']} className="flex-1" style={{ backgroundColor: colors.background }}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
-        <ThemedView variant="background" className="flex-1">
+    <SafeAreaView edges={['top', 'left', 'right']} style={[styles.root, { backgroundColor: colors.accent.pink }]}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
 
-          {/* Search Bar */}
-          <ThemedView variant="background" className="py-1 px-4">
-            <ThemedView variant="background" className="flex-row gap-2 mb-2">
+        {/* Hero */}
+        <View style={styles.hero}>
+          <Text style={styles.heroTitle}>Explore Vendors</Text>
+          <Text style={styles.heroSub}>Find your perfect wedding team</Text>
+
+          {/* Search inputs */}
+          <View style={styles.searchRow}>
+            <View style={[styles.inputWrap, { backgroundColor: isDark ? colors.surface : '#fff', flex: 1 }]}>
+              <Ionicons name="search-outline" size={16} color={colors.text.secondary} style={{ marginRight: 6 }} />
               <TextInput
-                placeholder="Vendor name..."
+                placeholder="Venue name, photographer..."
                 placeholderTextColor={colors.text.secondary}
-                value={locationsInput}
-                onChangeText={setLocationsInput}
-                style={{ flex: 1, backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, color: colors.text.primary }}
+                value={nameInput}
+                onChangeText={setNameInput}
+                onSubmitEditing={handleSearch}
+                returnKeyType="search"
+                style={[styles.input, { color: colors.text.primary }]}
               />
+              {nameInput.length > 0 && (
+                <TouchableOpacity onPress={() => setNameInput('')} hitSlop={8}>
+                  <Ionicons name="close-circle" size={16} color={colors.text.secondary} />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <View style={[styles.inputWrap, { backgroundColor: isDark ? colors.surface : '#fff', width: 100 }]}>
+              <Ionicons name="location-outline" size={15} color={colors.text.secondary} style={{ marginRight: 4 }} />
               <TextInput
                 placeholder="City"
                 placeholderTextColor={colors.text.secondary}
                 value={cityInput}
                 onChangeText={setCityInput}
-                style={{ width: 100, backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, color: colors.text.primary }}
+                onSubmitEditing={handleSearch}
+                returnKeyType="search"
+                style={[styles.input, { color: colors.text.primary }]}
               />
-              <ThemedButton title="Search" variant="primary" size="md" onPress={handleSearch} />
-            </ThemedView>
-          </ThemedView>
+            </View>
 
-          {/* Sort / Filter / Map bar */}
-          <ThemedView variant="background" className="flex-row items-center justify-between px-4 py-2">
-            <ThemedView variant="background" className="flex-row gap-2">
-              <TouchableOpacity
-                onPress={() => setShowSort(true)}
-                className="flex-row items-center px-3 py-2 rounded-full"
-                style={{ backgroundColor: colors.surface, borderWidth: sortBy !== 'rating_desc' ? 1.5 : 0, borderColor: '#EC4899' }}
-              >
-                <Ionicons name="swap-vertical" size={16} color={sortBy !== 'rating_desc' ? '#EC4899' : colors.text.secondary} />
-                <ThemedText variant="secondary" className="ml-1 text-sm" style={sortBy !== 'rating_desc' ? { color: '#EC4899' } : {}}>Sort</ThemedText>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => setShowFilter(true)}
-                className="flex-row items-center px-3 py-2 rounded-full"
-                style={{ backgroundColor: colors.surface, borderWidth: hasActiveFilter ? 1.5 : 0, borderColor: '#EC4899' }}
-              >
-                <Ionicons name="filter" size={16} color={hasActiveFilter ? '#EC4899' : colors.text.secondary} />
-                <ThemedText variant="secondary" className="ml-1 text-sm" style={hasActiveFilter ? { color: '#EC4899' } : {}}>
-                  {hasActiveFilter ? appliedCategoryLabel : 'Filter'}
-                </ThemedText>
-              </TouchableOpacity>
-            </ThemedView>
-
-            <TouchableOpacity
-              onPress={() => setShowMap(!showMap)}
-              className="flex-row items-center px-3 py-2 rounded-full"
-              style={{ backgroundColor: colors.surface }}
-            >
-              <Ionicons name={showMap ? 'map' : 'map-outline'} size={16} color={showMap ? '#EC4899' : colors.text.secondary} />
-              <ThemedText variant="secondary" className="ml-1 text-sm" style={{ color: showMap ? '#EC4899' : colors.text.secondary }}>Map</ThemedText>
+            <TouchableOpacity onPress={handleSearch} activeOpacity={0.85} style={styles.searchBtn}>
+              <Ionicons name="search" size={18} color="#EC4899" />
             </TouchableOpacity>
-          </ThemedView>
+          </View>
+        </View>
 
-          {/* Content */}
-          {showMap ? (
-            <ThemedView variant="background" className="flex-1 items-center justify-center px-8">
-              <Ionicons name="map-outline" size={48} color={colors.text.muted} />
-              <ThemedText className="text-lg font-semibold mt-4 text-center">Map view coming soon</ThemedText>
-              <ThemedText variant="secondary" className="text-sm mt-2 text-center">
-                Vendor locations on a map will be available in a future update.
-              </ThemedText>
-            </ThemedView>
-          ) : (
-            <VendorList
-              searchParams={searchParams}
-              sortBy={sortBy}
-              onVendorPress={(id) => router.push(`/vendor/${id}`)}
-              onFavoritePress={handleFavoritePress}
-              onContactPress={(id, name) => setContactVendor({ id, name })}
-              getFavoriteState={(id) => favoritesMap.has(id)}
-            />
-          )}
+        {/* Category pills */}
+        <ThemedView variant="background" style={styles.categoryBar}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScroll}>
+            {CATEGORIES.map((cat) => {
+              const active = selectedCategory === cat.value;
+              return (
+                <TouchableOpacity
+                  key={String(cat.value)}
+                  onPress={() => handleCategorySelect(cat.value as string | undefined)}
+                  activeOpacity={0.75}
+                  style={[
+                    styles.categoryChip,
+                    active
+                      ? { backgroundColor: colors.accent.pink }
+                      : { backgroundColor: colors.surface },
+                  ]}
+                >
+                  <Ionicons
+                    name={cat.icon}
+                    size={14}
+                    color={active ? '#fff' : colors.text.secondary}
+                    style={{ marginRight: 5 }}
+                  />
+                  <Text style={[styles.categoryLabel, { color: active ? '#fff' : colors.text.secondary }]}>
+                    {cat.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </ThemedView>
+
+        {/* Toolbar */}
+        <ThemedView variant="background" style={styles.toolbar}>
+          <TouchableOpacity
+            onPress={() => setShowSort(true)}
+            activeOpacity={0.75}
+            style={[styles.toolChip, { backgroundColor: isSortActive ? colors.accent.pink + '18' : colors.surface }]}
+          >
+            <Ionicons name="swap-vertical" size={15} color={isSortActive ? colors.accent.pink : colors.text.secondary} />
+            <Text style={[styles.toolLabel, { color: isSortActive ? colors.accent.pink : colors.text.secondary }]}>
+              {isSortActive ? SORT_OPTIONS.find((o) => o.value === sortBy)?.label.split(':')[0] : 'Sort'}
+            </Text>
+            {isSortActive && (
+              <View style={[styles.activeDot, { backgroundColor: colors.accent.pink }]} />
+            )}
+          </TouchableOpacity>
+        </ThemedView>
+
+        {/* Vendor list */}
+        <ThemedView variant="background" style={{ flex: 1 }}>
+          <VendorList
+            searchParams={searchParams}
+            sortBy={sortBy}
+            onVendorPress={(id) => router.push(`/vendor/${id}`)}
+            onFavoritePress={handleFavoritePress}
+            onContactPress={(id, name) => setContactVendor({ id, name })}
+            getFavoriteState={(id) => favoritesMap.has(id)}
+          />
         </ThemedView>
       </KeyboardAvoidingView>
 
@@ -177,47 +196,22 @@ export function VendorSearchScreen() {
         <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={() => setShowSort(false)} />
         <View style={[styles.sheet, { backgroundColor: isDark ? '#1C1C1E' : '#fff' }]}>
           <View style={styles.handle} />
-          <ThemedText className="text-lg font-bold mb-4">Sort by</ThemedText>
-          {SORT_OPTIONS.map((opt) => (
-            <TouchableOpacity
-              key={opt.value}
-              onPress={() => { setSortBy(opt.value); setShowSort(false); }}
-              style={[styles.optionRow, { borderColor: colors.border }]}
-            >
-              <ThemedText className="text-base">{opt.label}</ThemedText>
-              {sortBy === opt.value && <Ionicons name="checkmark" size={20} color="#EC4899" />}
-            </TouchableOpacity>
-          ))}
-        </View>
-      </Modal>
-
-      {/* Filter Modal */}
-      <Modal visible={showFilter} transparent animationType="slide" onRequestClose={() => setShowFilter(false)}>
-        <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={() => setShowFilter(false)} />
-        <View style={[styles.sheet, { backgroundColor: isDark ? '#1C1C1E' : '#fff' }]}>
-          <View style={styles.handle} />
-          <ThemedText className="text-lg font-bold mb-4">Filter by Category</ThemedText>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
-            {CATEGORIES.map((cat) => (
+          <ThemedText style={{ fontSize: 18, fontWeight: '700', marginBottom: 16 }}>Sort by</ThemedText>
+          {SORT_OPTIONS.map((opt) => {
+            const active = sortBy === opt.value;
+            return (
               <TouchableOpacity
-                key={String(cat.value)}
-                onPress={() => setSelectedCategory(cat.value as string | undefined)}
-                style={chipStyle(selectedCategory === cat.value)}
+                key={opt.value}
+                onPress={() => { setSortBy(opt.value); setShowSort(false); }}
+                style={[styles.optionRow, { borderBottomColor: colors.border }]}
               >
-                <ThemedText className="text-sm font-semibold" style={{ color: selectedCategory === cat.value ? '#fff' : colors.text.secondary }}>
-                  {cat.label}
+                <ThemedText style={[styles.optionLabel, active && { color: colors.accent.pink, fontWeight: '700' }]}>
+                  {opt.label}
                 </ThemedText>
+                {active && <Ionicons name="checkmark-circle" size={20} color={colors.accent.pink} />}
               </TouchableOpacity>
-            ))}
-          </ScrollView>
-          <ThemedButton
-            title="Apply Filter"
-            onPress={() => {
-              setSearchParams((prev) => ({ ...prev, category: selectedCategory }));
-              setShowFilter(false);
-            }}
-            size="lg"
-          />
+            );
+          })}
         </View>
       </Modal>
 
@@ -232,8 +226,77 @@ export function VendorSearchScreen() {
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1 },
+  hero: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 20,
+  },
+  heroTitle: { color: '#fff', fontSize: 30, fontWeight: '800', letterSpacing: -0.5 },
+  heroSub: { color: 'rgba(255,255,255,0.72)', fontSize: 14, marginTop: 2, marginBottom: 16 },
+  searchRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
+  inputWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  input: { flex: 1, fontSize: 14 },
+  searchBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  categoryBar: { paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: 'transparent' },
+  categoryScroll: { paddingHorizontal: 16, gap: 8 },
+  categoryChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  categoryLabel: { fontSize: 13, fontWeight: '600' },
+  toolbar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    gap: 8,
+  },
+  toolChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  toolLabel: { fontSize: 13, fontWeight: '600' },
+  activeDot: { width: 6, height: 6, borderRadius: 3, marginLeft: 2 },
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
-  sheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
+  sheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 44 },
   handle: { width: 40, height: 4, backgroundColor: '#D1D5DB', borderRadius: 2, alignSelf: 'center', marginBottom: 20 },
-  optionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14, borderBottomWidth: StyleSheet.hairlineWidth },
+  optionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 15,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  optionLabel: { fontSize: 15 },
 });

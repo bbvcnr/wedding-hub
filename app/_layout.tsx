@@ -68,6 +68,7 @@ export default function RootLayout() {
               <Stack.Screen name="manage-partner" options={{ headerShown: false }} />
               <Stack.Screen name="shortlist" options={{ headerShown: false }} />
               <Stack.Screen name="checklist" options={{ headerShown: false }} />
+              <Stack.Screen name="settings" options={{ headerShown: false }} />
             </Stack>
           </AuthGate>
         </AuthProvider>

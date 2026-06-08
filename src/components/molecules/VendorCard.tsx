@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { TouchableOpacity, Image, StyleSheet, View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedView, ThemedText } from '@/src/components/theme/themed-view';
 import { ThemedButton } from '@/src/components/theme/themed-button';
@@ -70,158 +70,142 @@ export function VendorCard({
   };
 
   return (
-    <ThemedView variant="surface" className="rounded-xl overflow-hidden mb-4 shadow-sm">
-      {/* Image with Favorite Icon */}
-      <ThemedView variant="surface" style={styles.imageContainer}>
+    <TouchableOpacity
+      onPress={() => onDetailsPress?.(vendor.id)}
+      activeOpacity={0.97}
+      style={[styles.cardWrap, { backgroundColor: colors.card }]}
+    >
+    <ThemedView variant="card" style={styles.card}>
+      {/* Image */}
+      <View style={styles.imageContainer}>
         {vendor.imageUrl ? (
-          <Image
-            source={{ uri: vendor.imageUrl }}
-            style={styles.image}
-            resizeMode="cover"
-          />
+          <Image source={{ uri: vendor.imageUrl }} style={styles.image} resizeMode="cover" />
         ) : (
-          <ThemedView
-            variant="surface"
-            style={[styles.image, { backgroundColor: isDark ? '#2A2A2A' : '#E5E7EB' }]}
-          />
+          <View style={[styles.image, { backgroundColor: isDark ? '#2A2A2A' : colors.surface }]} />
         )}
-        <TouchableOpacity
-          onPress={handleFavoritePress}
-          style={styles.favoriteButton}
-        >
+
+        {/* Category pill */}
+        {vendor.category && (
+          <View style={styles.categoryPill}>
+            <Text style={styles.categoryText}>{vendor.category}</Text>
+          </View>
+        )}
+
+        {/* Favorite button */}
+        <TouchableOpacity onPress={handleFavoritePress} style={styles.favoriteButton} activeOpacity={0.8}>
           <Ionicons
             name={isFavorite ? 'heart' : 'heart-outline'}
-            size={20}
-            color={isFavorite ? '#EC4899' : '#1F2937'}
+            size={18}
+            color={isFavorite ? '#EC4899' : '#fff'}
           />
         </TouchableOpacity>
-      </ThemedView>
+      </View>
 
       {/* Content */}
-      <ThemedView variant="card" style={styles.content}>
-        {/* Title */}
-        <ThemedText className="text-xl font-bold mb-2">
-          {vendor.name}
-        </ThemedText>
+      <View style={styles.content}>
+        {/* Name + rating row */}
+        <View style={styles.nameRow}>
+          <ThemedText style={styles.name} numberOfLines={1}>{vendor.name}</ThemedText>
+          {vendor.rating != null && (
+            <View style={styles.ratingBadge}>
+              <Ionicons name="star" size={11} color="#FFD700" />
+              <Text style={styles.ratingText}>{vendor.rating.toFixed(1)}</Text>
+            </View>
+          )}
+        </View>
 
-        {/* Rating */}
-        <ThemedView variant="card" style={styles.ratingContainer}>
-          <ThemedView variant="card" style={styles.starsContainer}>
-            {renderStars(vendor.rating)}
-          </ThemedView>
-          <ThemedText variant="secondary" className="text-sm">
-            {vendor.rating?.toFixed(1) || '0.0'}
-          </ThemedText>
-        </ThemedView>
-
-        {/* Capacity/Tags */}
-        <ThemedView variant="card" style={styles.tagsContainer}>
-          {vendor.capacity && (
-            <ThemedView variant="card" style={styles.tagItem}>
-              <Ionicons
-                name="people"
-                size={16}
-                color={isDark ? '#9CA3AF' : '#6B7280'}
-                style={{ marginRight: 4 }}
-              />
-              <ThemedText variant="secondary" className="text-sm">
-                Up to {vendor.capacity} guests
-              </ThemedText>
-            </ThemedView>
+        {/* Meta row */}
+        <View style={styles.metaRow}>
+          {vendor.capacity != null && (
+            <View style={styles.metaChip}>
+              <Ionicons name="people-outline" size={12} color={colors.text.secondary} />
+              <ThemedText variant="secondary" style={styles.metaLabel}>{vendor.capacity}</ThemedText>
+            </View>
           )}
           {vendor.tags && vendor.tags.length > 0 && (
-            <ThemedView variant="card" style={styles.tagItem}>
-              <Ionicons
-                name="location"
-                size={16}
-                color={isDark ? '#9CA3AF' : '#6B7280'}
-                style={{ marginRight: 4 }}
-              />
-              <ThemedText variant="secondary" className="text-sm">
-                {vendor.tags[0]}
-              </ThemedText>
-            </ThemedView>
+            <View style={styles.metaChip}>
+              <Ionicons name="location-outline" size={12} color={colors.text.secondary} />
+              <ThemedText variant="secondary" style={styles.metaLabel}>{vendor.tags[0]}</ThemedText>
+            </View>
           )}
-        </ThemedView>
+        </View>
 
         {/* Description */}
-        <ThemedText
-          variant="secondary"
-          className="text-sm mb-4"
-          numberOfLines={2}
-        >
-          {vendor.shortDescription || 'Lorem ipsum dolor sit amet, consectetur adipiscing elit...'}
+        <ThemedText variant="secondary" style={styles.description} numberOfLines={2}>
+          {vendor.shortDescription || ''}
         </ThemedText>
 
-        {/* Action Buttons */}
-        <ThemedView variant="card" style={styles.buttonsContainer}>
-          <ThemedView variant="card" style={styles.buttonWrapper}>
-            <ThemedButton
-              title="View Details"
-              variant="outline"
-              size="sm"
-              onPress={() => onDetailsPress?.(vendor.id)}
-            />
-          </ThemedView>
-          <ThemedView variant="card" style={styles.buttonWrapper}>
-            <ThemedButton
-              title="Contact"
-              variant="primary"
-              size="sm"
-              onPress={() => onContactPress?.(vendor.id, vendor.name)}
-            />
-          </ThemedView>
-        </ThemedView>
-      </ThemedView>
+        {/* Actions */}
+        <TouchableOpacity
+          onPress={(e) => { e.stopPropagation(); onContactPress?.(vendor.id, vendor.name); }}
+          activeOpacity={0.85}
+          style={[styles.contactBtn, { backgroundColor: colors.accent.pink }]}
+        >
+          <Ionicons name="chatbubble-outline" size={14} color="#fff" style={{ marginRight: 6 }} />
+          <Text style={[styles.btnLabel, { color: '#fff' }]}>Contact</Text>
+        </TouchableOpacity>
+      </View>
     </ThemedView>
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  imageContainer: {
-    position: 'relative',
-    width: '100%',
+  cardWrap: {
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 14,
+    elevation: 5,
   },
-  image: {
-    width: '100%',
-    height: 192,
+  card: {
+    borderRadius: 20,
+    overflow: 'hidden',
   },
+  imageContainer: { position: 'relative', width: '100%' },
+  image: { width: '100%', height: 180 },
+  categoryPill: {
+    position: 'absolute',
+    bottom: 10,
+    left: 12,
+    backgroundColor: 'rgba(0,0,0,0.52)',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  categoryText: { color: '#fff', fontSize: 11, fontWeight: '600', letterSpacing: 0.3 },
   favoriteButton: {
     position: 'absolute',
-    top: 12,
-    right: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(0,0,0,0.35)',
     borderRadius: 20,
-    padding: 8,
+    padding: 7,
   },
-  content: {
-    padding: 16,
-  },
-  ratingContainer: {
+  content: { padding: 14, paddingTop: 12 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 },
+  name: { fontSize: 16, fontWeight: '800', letterSpacing: -0.3, flex: 1, marginRight: 8 },
+  ratingBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    gap: 3,
+    backgroundColor: '#FFF8E1',
+    borderRadius: 10,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
   },
-  starsContainer: {
+  ratingText: { fontSize: 11, fontWeight: '700', color: '#92620A' },
+  metaRow: { flexDirection: 'row', gap: 10, marginBottom: 8 },
+  metaChip: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  metaLabel: { fontSize: 12 },
+  description: { fontSize: 13, lineHeight: 18, marginBottom: 14 },
+  contactBtn: {
     flexDirection: 'row',
+    height: 38,
+    borderRadius: 10,
     alignItems: 'center',
-    marginRight: 8,
+    justifyContent: 'center',
   },
-  tagsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 12,
-  },
-  tagItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  buttonsContainer: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  buttonWrapper: {
-    flex: 1,
-  },
+  btnLabel: { fontSize: 13, fontWeight: '700' },
 });

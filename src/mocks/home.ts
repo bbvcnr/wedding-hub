@@ -36,14 +36,7 @@ export const mockHomeContent: HomeContent = {
       imageUrl: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400',
     },
   ],
-  hireServices: [
-    {
-      id: 'hire-1',
-      title: 'Hire a Wedding Organizer',
-      description: 'Get expert help with timelines, budgeting, and vendor coordination.',
-      actionLabel: 'Find Organizers',
-    }
-  ],
+  hireServices: [],
   featuredVendors: [
     {
       id: '1',
@@ -127,16 +120,55 @@ export const mockHomeContent: HomeContent = {
     {
       id: 'tip-1',
       title: 'Budget first, then book',
-      description: 'Decide your budget early to guide venue and vendor choices.',
+      description: 'Set your total budget before falling in love with a venue — it keeps every other decision grounded.',
+      accent: 'pink' as const,
     },
     {
       id: 'tip-2',
-      title: 'Think about guest experience',
-      description: 'Prioritize comfort: seating, food, and music flow matter most.',
+      title: 'Guest experience is everything',
+      description: 'Comfortable seating, great food, and smooth music transitions are what guests remember most.',
+      accent: 'blue' as const,
+    },
+    {
+      id: 'tip-3',
+      title: 'Book the photographer early',
+      description: 'Top photographers fill up 12–18 months in advance. Lock yours in before finalising other vendors.',
+      accent: 'green' as const,
+    },
+    {
+      id: 'tip-4',
+      title: 'Visit venues on a wedding day',
+      description: 'Seeing a venue during an actual event shows how staff perform and how the space really feels.',
+      accent: 'pink' as const,
+    },
+    {
+      id: 'tip-5',
+      title: 'Build in a buffer',
+      description: 'Reserve 10–15 % of your budget for last-minute surprises — they always come up.',
+      accent: 'blue' as const,
+    },
+    {
+      id: 'tip-6',
+      title: 'Send invites early',
+      description: 'Mail save-the-dates 6–8 months out so guests can plan travel and accommodation.',
+      accent: 'green' as const,
+    },
+    {
+      id: 'tip-7',
+      title: 'Less is more on decor',
+      description: 'A few statement pieces with negative space look far more elegant than filling every surface.',
+      accent: 'pink' as const,
+    },
+    {
+      id: 'tip-8',
+      title: 'Have a day-of coordinator',
+      description: 'Even if you planned everything yourself, a coordinator frees you to actually enjoy your wedding.',
+      accent: 'blue' as const,
     },
   ],
   quickActions: [
-    { id: 'qa-2', label: 'Explore Vendors', route: '/(tabs)/search', color: 'pink', icon: 'search' },
-    { id: 'qa-3', label: 'View Favorites', route: '/(tabs)/saved', color: 'neutral', icon: 'heart' },
+    { id: 'qa-1', label: 'Explore Vendors', route: '/(tabs)/search', color: 'pink', icon: 'search' },
+    { id: 'qa-2', label: 'View Favorites', route: '/(tabs)/saved', color: 'blue', icon: 'heart' },
+    { id: 'qa-3', label: 'My Checklist', route: '/checklist', color: 'green', icon: 'checkbox-outline' },
   ],
 };
