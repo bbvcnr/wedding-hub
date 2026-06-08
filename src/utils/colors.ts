@@ -8,11 +8,11 @@ export const colors = {
   theme: {
     light: {
       background: '#FFFFFF',
-      surface: '#F5F5F5',
-      card: '#F5F5F5',
-      text: '#1F2937',
-      textSecondary: '#6B7280',
-      border: '#E5E7EB',
+      surface: '#F7F7F7',
+      card: '#F7F7F7',
+      text: '#1C1412',
+      textSecondary: '#6B5C58',
+      border: '#CCBDB8',
     },
     dark: {
       background: '#09090b',

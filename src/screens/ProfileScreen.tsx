@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ScrollView, View, TouchableOpacity, FlatList, Alert } from 'react-native';
+import { ScrollView, View, TouchableOpacity, FlatList } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -11,7 +11,6 @@ import { BudgetModal } from '@/src/components/molecules/BudgetModal';
 import { ContactModal } from '@/src/components/molecules/ContactModal';
 import { useTheme } from '@/src/components/theme/theme-provider';
 import { useWedding } from '@/src/hooks/useWedding';
-import { useAuth } from '@/src/context/AuthContext';
 import { Wedding } from '@/src/types/profile';
 
 const formatWeddingDate = (date?: string) => {
@@ -88,8 +87,6 @@ export function ProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const tabBarOffset = 54;
-  const { logout } = useAuth();
-
   const { loading, wedding, favorites, recentVendors } = useWedding(5);
   const [weddingData, setWeddingData] = useState<Partial<Wedding>>({});
   const [showGuests, setShowGuests] = useState(false);
@@ -105,13 +102,6 @@ export function ProfileScreen() {
   const remainingBudget = mergedWedding?.totalBudget != null && mergedWedding?.spentBudget != null
     ? mergedWedding.totalBudget - mergedWedding.spentBudget
     : null;
-
-  const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to log out?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Logout', style: 'destructive', onPress: () => logout() },
-    ]);
-  };
 
   const weddingDateLabel = useMemo(() => formatWeddingDate(wedding?.weddingDate), [wedding]);
   const daysUntilWedding = useMemo(() => getDaysUntil(wedding?.weddingDate), [wedding]);
@@ -385,35 +375,19 @@ export function ProfileScreen() {
           </View>
         </ThemedView>
 
-        {/* Account / Wedding Settings */}
+        {/* Settings shortcut */}
         <ThemedView variant="background" className="px-6 pt-6">
-          <ThemedText className="text-lg font-semibold mb-3">Settings</ThemedText>
           <ThemedView
             variant="card"
             className="rounded-xl"
             style={{ borderColor: colors.border, borderWidth: 1 }}
           >
-            <TouchableOpacity onPress={() => router.push('/edit-wedding')} className="flex-row items-center justify-between px-4 py-4">
+            <TouchableOpacity onPress={() => router.push('/settings')} className="flex-row items-center justify-between px-4 py-4">
               <View className="flex-row items-center">
-                <Ionicons name="create-outline" size={18} color={colors.text.secondary} />
-                <ThemedText className="ml-3">Edit Wedding Details</ThemedText>
+                <Ionicons name="settings-outline" size={18} color={colors.text.secondary} />
+                <ThemedText className="ml-3">Settings</ThemedText>
               </View>
               <Ionicons name="chevron-forward" size={16} color={colors.text.secondary} />
-            </TouchableOpacity>
-            <View className="h-px" style={{ backgroundColor: colors.border }} />
-            <TouchableOpacity onPress={() => router.push('/manage-partner')} className="flex-row items-center justify-between px-4 py-4">
-              <View className="flex-row items-center">
-                <Ionicons name="people-outline" size={18} color={colors.text.secondary} />
-                <ThemedText className="ml-3">Manage partner</ThemedText>
-              </View>
-              <Ionicons name="chevron-forward" size={16} color={colors.text.secondary} />
-            </TouchableOpacity>
-            <View className="h-px" style={{ backgroundColor: colors.border }} />
-            <TouchableOpacity onPress={handleLogout} className="flex-row items-center justify-between px-4 py-4">
-              <View className="flex-row items-center">
-                <Ionicons name="log-out-outline" size={18} color="#EF4444" />
-                <ThemedText className="ml-3" style={{ color: '#EF4444' }}>Logout</ThemedText>
-              </View>
             </TouchableOpacity>
           </ThemedView>
         </ThemedView>
